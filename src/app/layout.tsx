@@ -1,25 +1,26 @@
-import './globals.css';
-import { Montserrat } from 'next/font/google';
-import ControlPanelLayout from '@/components/ControlPanelLayout';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import './globals.css'
+import type { Metadata } from 'next'
+import { Montserrat } from 'next/font/google'
+import LayoutWrapper from '@/components/LayoutWrapper'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['400','600','700'] });
+const montserrat = Montserrat({ subsets: ['latin'], weight: ['400', '600', '700'] })
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Лунная база',
   description: 'Управление инфраструктурой на Луне',
-};
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
       <body className={montserrat.className}>
-        <ControlPanelLayout>
+        <LayoutWrapper>
           {children}
-          <ToastContainer />
-        </ControlPanelLayout>
+        </LayoutWrapper>
+        <ToastContainer />
       </body>
     </html>
-  );
+  )
 }
