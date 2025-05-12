@@ -1,0 +1,19 @@
+{
+  "/api/login/route": "/api/login",
+  "/api/upload-avatar/route": "/api/upload-avatar",
+  "/page": "/",
+  "/confirmed/page": "/confirmed",
+  "/dashboard/page": "/dashboard",
+  "/login/page": "/login",
+  "/logout/page": "/logout",
+  "/profile/page": "/profile",
+  "/register/page": "/register",
+  "/api/energy/route": "/api/energy",
+  "/api/life-support/route": "/api/life-support",
+  "/api/notifications/route": "/api/notifications",
+  "/api/personnel/route": "/api/personnel",
+  "/api/projects/route": "/api/projects",
+  "/api/register/route": "/api/register",
+  "/api/security-status/route": "/api/security-status",
+  "/api/systems/route": "/api/systems"
+}
