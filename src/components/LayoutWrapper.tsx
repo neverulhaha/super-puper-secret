@@ -10,7 +10,7 @@ interface Props { children: ReactNode }
 export default function LayoutWrapper({ children }: Props) {
   const path   = usePathname()
   const noNav  = ['/login', '/register']
-  const isProf = path === '/profile' || path === '/dashboard' || path === '/analysis'
+  const isProf = path === '/profile' || path === '/dashboard' || path === '/analysis' || path === '/infrastructure'
   if (noNav.includes(path || '')) {
     return <>{children}</>
   }
