@@ -11,6 +11,7 @@ export default function LayoutWrapper({ children }: Props) {
   const path   = usePathname()
   const noNav  = ['/login', '/register']
   const isProf = path === '/profile' || path === '/dashboard' || path === '/analysis' || path === '/infrastructure'
+  || path === '/resources' || path === '/navigation' || path === '/robotics' || path === '/medical' || path === '/admin' || path === '/security' || path === '/analytics'
   if (noNav.includes(path || '')) {
     return <>{children}</>
   }
