@@ -100,18 +100,18 @@ export default function AdminPage() {
             <table className="min-w-full text-sm divide-y divide-gray-200 mt-4">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-2 text-left">Документ</th>
-                  <th className="px-4 py-2">Тип</th>
-                  <th className="px-4 py-2">Статус</th>
-                  <th className="px-4 py-2">Отдел</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Документ</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Отдел</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {docs.map(d => (
                   <tr key={d.id}>
-                    <td className="px-4 py-2">{d.title}</td>
-                    <td className="px-4 py-2 text-center">{d.type}</td>
-                    <td className="px-4 py-2 text-center">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{d.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{d.type}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <span
                         className={`px-2 py-1 text-xs rounded-full ${
                           d.status === 'РАЗРЕШЕНО'
@@ -124,7 +124,7 @@ export default function AdminPage() {
                         {d.status}
                       </span>
                     </td>
-                    <td className="px-4 py-2 text-center">{d.dept}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{d.dept}</td>
                   </tr>
                 ))}
               </tbody>
