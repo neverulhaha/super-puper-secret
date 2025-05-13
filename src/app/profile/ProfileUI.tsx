@@ -142,13 +142,13 @@ export default function ProfileUI() {
   if (!profile) return <div className="text-center text-gray-500 mt-8">Профиль не найден</div>
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8 bg-white rounded-lg shadow-lg mt-8 space-y-10">
-      <h1 className="text-2xl font-bold text-gray-800 text-center sm:text-left">Профиль пользователя</h1>
-      {message && <p className="text-green-600 text-center sm:text-left">{message}</p>}
+    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-8 space-y-10">
+      <h1 className="text-2xl font-bold text-gray-800">Профиль пользователя</h1>
+      {message && <p className="text-green-600">{message}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
-          <div className="relative w-full max-w-[200px] mx-auto md:mx-0 group overflow-hidden rounded-lg">
+        <div className="grid grid-cols-[200px_1fr] gap-8 items-stretch">
+          <div className="relative w-full group overflow-hidden rounded-lg">
             <img
               src={profile.avatar_url || '/photo/default.jpg'}
               alt="Фото профиля"
@@ -168,7 +168,7 @@ export default function ProfileUI() {
               className="hidden"
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 pr-4">
             <Field label="ID" name="id" value={profile.id} readOnly />
             <Field label="Email" name="email" value={profile.email} readOnly />
             <Field label="Имя" name="first_name" value={profile.first_name} onChange={handleChange} />
@@ -185,9 +185,9 @@ export default function ProfileUI() {
         </button>
       </form>
 
-      <form onSubmit={handlePasswordSubmit} className="mt-10 space-y-4 max-w-md mx-auto">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 text-center sm:text-left">Изменить пароль</h2>
-        {pwdMessage && <p className="text-red-600 text-center sm:text-left">{pwdMessage}</p>}
+      <form onSubmit={handlePasswordSubmit} className="mt-10 space-y-4 max-w-md">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">Изменить пароль</h2>
+        {pwdMessage && <p className="text-red-600">{pwdMessage}</p>}
 
         <div>
           <label className="block font-medium mb-1 text-gray-700">Текущий пароль</label>
