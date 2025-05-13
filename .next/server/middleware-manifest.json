@@ -1,26 +1,6 @@
 {
   "sortedMiddleware": [],
   "middleware": {},
-  "functions": {
-    "/api/login/route": {
-      "files": [
-        "server/middleware-build-manifest.js",
-        "server/middleware-react-loadable-manifest.js",
-        "server/next-font-manifest.js",
-        "server/edge-runtime-webpack.js",
-        "server/app/api/login/route.js"
-      ],
-      "name": "app/api/login/route",
-      "page": "/api/login/route",
-      "matchers": [
-        {
-          "regexp": "^/api/login$",
-          "originalSource": "/api/login"
-        }
-      ],
-      "wasm": [],
-      "assets": []
-    }
-  },
+  "functions": {},
   "version": 2
 }
