@@ -21,7 +21,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 const navigation = [
   { name: 'Профиль',        icon: User,            href: '/profile' },
   { name: 'Панель управления',         icon: LayoutDashboard, href: '/dashboard' },
-  { name: 'Анализ участка', icon: Map,             href: '/site-analysis' },
+  { name: 'Анализ участка', icon: Map,             href: '/analysis' },
   { name: 'Инфраструктура', icon: Building2,       href: '/infrastructure' },
   { name: 'Ресурсы',        icon: Battery,         href: '/resources' },
   { name: 'Навигация',      icon: Navigation,      href: '/navigation' },
