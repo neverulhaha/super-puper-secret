@@ -188,35 +188,37 @@ export default function AnalysisPage() {
         </div>
       </div>
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium mb-4">История анализов</h3>
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b">
-              <th className="py-2 text-sm font-medium">Дата</th>
-              <th className="py-2 text-sm font-medium">Координаты</th>
-              <th className="py-2 text-sm font-medium">Результат</th>
-              <th className="py-2 text-sm font-medium">Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {history.map((entry) => (
-              <tr key={entry.id} className="border-b even:bg-gray-50">
-                <td className="py-2 text-sm">{entry.date}</td>
-                <td className="py-2 text-sm">{entry.coords}</td>
-                <td className="py-2 text-sm">{entry.summary}</td>
-                <td className="py-2 text-sm space-x-2">
-                  <button className="inline-flex items-center text-gray-600 hover:text-gray-800">
-                    <EyeIcon className="w-5 h-5" />
-                  </button>
-                  <button className="inline-flex items-center text-red-600 hover:text-red-800">
-                    <TrashIcon className="w-5 h-5" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+  <h3 className="text-lg font-medium mb-4">История анализов</h3>
+  <div className="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Дата</th>
+          <th>Координаты</th>
+          <th>Результат</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {history.map(entry => (
+          <tr key={entry.id}>
+            <td>{entry.date}</td>
+            <td>{entry.coords}</td>
+            <td>{entry.summary}</td>
+            <td className="flex space-x-2">
+              <button className="hover:text-gray-800">
+                <EyeIcon className="w-5 h-5 text-gray-600" />
+              </button>
+              <button className="hover:text-red-800">
+                <TrashIcon className="w-5 h-5 text-red-600" />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
     </div>
   );
 }
