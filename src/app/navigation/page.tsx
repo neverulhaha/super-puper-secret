@@ -1,4 +1,3 @@
-// app/navigation/page.tsx
 'use client';
 import React, { useState } from 'react';
 import {
@@ -14,6 +13,7 @@ import {
   ClockIcon,
   ExclamationTriangleIcon,
   MapPinIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 
 export default function NavigationPage() {
@@ -35,7 +35,7 @@ export default function NavigationPage() {
     zones.map(z => ({ id: z.id, name: z.name, count: Math.floor(Math.random() * 5) + 1, status: z.id === 'launch' ? 'Техобслуживание' : 'Эксплуатируется' }))
   );
 
-  const [routeParams, setRouteParams] = useState({ from: 'Жилой модуль A', to: 'Лаборатория', transport: 'Пешком', priority: 'Стандартный' });
+  const [routeParams, setRouteParams] = useState({ from: zones[0].name, to: zones[1].name, transport: 'Пешком', priority: 'Стандартный' });
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
@@ -52,7 +52,7 @@ export default function NavigationPage() {
       </header>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="relative flex-1 bg-gray-100 rounded-lg h-96">
+        <div className="relative flex-1 bg-gray-100 rounded-lg h-96 overflow-hidden">
           <div className="absolute top-4 right-4 flex flex-col space-y-2 bg-white p-1 rounded shadow">
             <button>
               <MagnifyingGlassPlusIcon className="w-5 h-5 text-gray-600" />
@@ -76,19 +76,23 @@ export default function NavigationPage() {
           <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
             <defs>
               <marker id="arrow" markerWidth="4" markerHeight="4" refX="0" refY="2" orient="auto">
-                <path d="M0,0 L4,2 L0,4" fill="orange" />
+                <path d="M0,0 L4,2 L0,4" fill="blue" />
               </marker>
             </defs>
             {transports.map(t => {
               const from = zones.find(z => z.id === t.from)!;
               const to = zones.find(z => z.id === t.to)!;
+              const x1 = parseFloat(from.left) + parseFloat(from.w) / 2;
+              const y1 = parseFloat(from.top) + parseFloat(from.h) / 2;
+              const x2 = parseFloat(to.left) + parseFloat(to.w) / 2;
+              const y2 = parseFloat(to.top) + parseFloat(to.h) / 2;
               return (
                 <line
                   key={t.id}
-                  x1={parseFloat(from.left) + parseFloat(from.w) / 2}
-                  y1={parseFloat(from.top) + parseFloat(from.h) / 2}
-                  x2={parseFloat(to.left) + parseFloat(to.w) / 2}
-                  y2={parseFloat(to.top) + parseFloat(to.h) / 2}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
                   stroke={t.warning ? 'orange' : 'blue'}
                   strokeWidth="0.5"
                   strokeDasharray="2"
@@ -98,11 +102,13 @@ export default function NavigationPage() {
             })}
             {transports.filter(t => t.warning).map(t => {
               const to = zones.find(z => z.id === t.to)!;
+              const x = parseFloat(to.left) + parseFloat(to.w) / 2 + 1;
+              const y = parseFloat(to.top) + parseFloat(to.h) / 2 + 1;
               return (
                 <ExclamationTriangleIcon
                   key={`warn-${t.id}`}
-                  className="absolute w-6 h-6 text-yellow-500"
-                  style={{ top: `calc(${to.top} + ${to.h}/2)`, left: `calc(${to.left} + ${to.w}/2)` }}
+                  className="absolute w-4 h-4 text-yellow-500"
+                  style={{ top: `${y}%`, left: `${x}%`, transform: 'translate(-50%, -50%)' }}
                 />
               );
             })}
@@ -120,8 +126,10 @@ export default function NavigationPage() {
                 <div className="flex items-center space-x-3">
                   <MapPinIcon className="w-5 h-5 text-gray-700" />
                   <div className="text-sm">
-                    <p className="font-medium">{t.name}</p>
-                    <p className="text-xs">{zones.find(z => z.id === t.from)!.name} → {zones.find(z => z.id === t.to)!.name}</p>
+                    <p className="font-medium truncate">{t.name}</p>
+                    <p className="text-xs truncate">
+                      {zones.find(z => z.id === t.from)!.name} → {zones.find(z => z.id === t.to)!.name}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-1 text-sm">
@@ -143,16 +151,16 @@ export default function NavigationPage() {
               placeholder="Поиск локации..."
               className="w-full border rounded px-3 py-2"
             />
-            <MagnifyingGlassPlusIcon className="w-5 h-5 text-gray-400 absolute right-3 top-3" />
+            <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute right-3 top-3" />
           </div>
           <ul className="space-y-2">
             {bases.map(b => (
               <li key={b.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                 <div className="flex items-center space-x-2">
                   <MapPinIcon className="w-5 h-5 text-gray-700" />
-                  <span>{b.name}</span>
+                  <span className="truncate">{b.name}</span>
                 </div>
-                <div className="text-sm text-gray-500">Занято: {b.count} чел.</div>
+                <span className="text-sm text-gray-500">Занято: {b.count} чел.</span>
                 <span className={`px-2 py-1 text-xs rounded ${b.status === 'Эксплуатируется' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                   {b.status}
                 </span>
@@ -165,7 +173,6 @@ export default function NavigationPage() {
           <h2 className="text-lg font-medium">Планирование маршрута</h2>
           <div className="space-y-3 text-sm">
             <div>
-              <label className="block mb-1">Отправная точка</label>
               <select
                 value={routeParams.from}
                 onChange={e => setRouteParams({ ...routeParams, from: e.target.value })}
@@ -175,7 +182,6 @@ export default function NavigationPage() {
               </select>
             </div>
             <div>
-              <label className="block mb-1">Пункт назначения</label>
               <select
                 value={routeParams.to}
                 onChange={e => setRouteParams({ ...routeParams, to: e.target.value })}
@@ -185,7 +191,6 @@ export default function NavigationPage() {
               </select>
             </div>
             <div>
-              <label className="block mb-1">Тип транспорта</label>
               <select
                 value={routeParams.transport}
                 onChange={e => setRouteParams({ ...routeParams, transport: e.target.value })}
@@ -195,7 +200,6 @@ export default function NavigationPage() {
               </select>
             </div>
             <div>
-              <label className="block mb-1">Приоритет</label>
               <select
                 value={routeParams.priority}
                 onChange={e => setRouteParams({ ...routeParams, priority: e.target.value })}
