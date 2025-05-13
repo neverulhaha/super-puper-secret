@@ -2,234 +2,221 @@
 
 import React, { useState } from 'react';
 import {
-  MapPinIcon,
+  PlusIcon,
+  MinusIcon,
+  ArrowUpTrayIcon,
   MagnifyingGlassIcon,
+  XMarkIcon,
   ChartBarIcon,
   CubeIcon,
   ExclamationTriangleIcon,
-  ArrowPathIcon,
-  ArrowDownTrayIcon,
+  EyeIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 
-type Coordinates = {
-  lat: string;
-  long: string;
-};
-
-type Relief = {
-  elevationProfile: number[];
-};
-
-type Resource = {
+type Zone = {
+  id: number;
   name: string;
-  abundance: string;
+  color: string;
+  top: string;
+  left: string;
+  width: string;
+  height: string;
 };
 
-type Danger = {
-  type: string;
-  severity: 'low' | 'medium' | 'high';
+type ResourceDistribution = {
+  name: string;
+  percentage: number;
+  color: string;
 };
 
-type AnalysisResult = {
-  relief: Relief;
-  resources: Resource[];
-  dangers: Danger[];
+type RiskItem = {
+  name: string;
+  level: 'low' | 'medium' | 'high';
+  percent: number;
+};
+
+type HistoryEntry = {
+  id: number;
+  date: string;
+  coords: string;
+  summary: string;
 };
 
 export default function AnalysisPage() {
-  const [coords, setCoords] = useState<Coordinates>({ lat: '', long: '' });
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [zones] = useState<Zone[]>([
+    { id: 1, name: 'Зона A', color: 'border-blue-400', top: '10%', left: '10%', width: '30%', height: '25%' },
+    { id: 2, name: 'Зона B', color: 'border-green-400', top: '50%', left: '20%', width: '25%', height: '30%' },
+    { id: 3, name: 'Зона C', color: 'border-purple-400', top: '30%', left: '60%', width: '30%', height: '20%' },
+  ]);
 
-  const handleAnalyze = () => {
-    setResult({
-      relief: {
-        elevationProfile: [-1750, -1700, -1725, -1690, -1680, -1705],
-      },
-      resources: [
-        { name: 'Гелий-3', abundance: '0.13 %' },
-        { name: 'Титан', abundance: '1.2 %' },
-        { name: 'Кремний', abundance: '21.5 %' },
-      ],
-      dangers: [
-        { type: 'Кратеры', severity: 'high' },
-        { type: 'Склон 30°', severity: 'medium' },
-        { type: 'Радиоактивные аномалии', severity: 'low' },
-      ],
-    });
-    setSaved(false);
-  };
-
-  const handleSave = () => {
-    setSaved(true);
-  };
-
-  const handleUpdate = () => {
-    setResult(null);
-    setSaved(false);
-    handleAnalyze();
-  };
-
-  const severityBadge = (severity: Danger['severity']) => {
-    switch (severity) {
-      case 'low':
-        return 'bg-green-100 text-green-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'high':
-        return 'bg-red-100 text-red-800';
-    }
-  };
+  const [coords, setCoords] = useState({ lat: '', long: '' });
+  const [resources] = useState<ResourceDistribution[]>([
+    { name: 'Гелий-3', percentage: 12.3, color: 'bg-blue-500' },
+    { name: 'Титан', percentage: 25.8, color: 'bg-green-500' },
+    { name: 'Кремний', percentage: 61.9, color: 'bg-yellow-500' },
+  ]);
+  const [risks] = useState<RiskItem[]>([
+    { name: 'Кратеры', level: 'medium', percent: 45 },
+    { name: 'Склоны >30°', level: 'high', percent: 75 },
+    { name: 'Радиоактивность', level: 'low', percent: 15 },
+  ]);
+  const [history] = useState<HistoryEntry[]>([
+    { id: 1, date: '2025-05-12', coords: '14.657°, 34.123°', summary: 'Низкая опасность' },
+    { id: 2, date: '2025-05-10', coords: '15.002°, 33.987°', summary: 'Средняя опасность' },
+    { id: 3, date: '2025-05-08', coords: '14.123°, 34.456°', summary: 'Высокая опасность' },
+  ]);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen space-y-8 text-black">
-      <header className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <h1 className="text-2xl font-semibold text-black">
-          Анализ участка поверхности
-        </h1>
-        <div className="flex space-x-2">
-          <button
-            onClick={handleUpdate}
-            className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-          >
-            <ArrowPathIcon className="w-4 h-4 mr-1" />
-            Обновить
+    <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
+      <header className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Исследование участка</h1>
+        <div className="space-x-2">
+          <button className="inline-flex items-center px-3 py-1 bg-blue-600 text-white rounded">
+            <PlusIcon className="w-4 h-4 mr-1" /> Новая зона
           </button>
-          {saved && (
-            <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-              <ArrowDownTrayIcon className="w-4 h-4 mr-1" />
-              Сохранено
-            </span>
-          )}
+          <button className="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded">
+            <ArrowUpTrayIcon className="w-4 h-4 mr-1" /> Экспортировать
+          </button>
         </div>
       </header>
 
-      <section className="bg-white p-6 rounded-lg shadow space-y-4">
-        <h2 className="text-xl font-medium text-black mb-2">
-          Введите координаты участка
-        </h2>
-        <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0">
-          <div className="flex-1">
-            <label className="block text-sm text-black mb-1">
-              Широта (°)
-            </label>
-            <input
-              type="text"
-              value={coords.lat}
-              onChange={(e) =>
-                setCoords({ ...coords, lat: e.target.value })
-              }
-              className="w-full border rounded px-3 py-2"
-              placeholder="Например, 14.657"
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block text-sm text-black mb-1">
-              Долгота (°)
-            </label>
-            <input
-              type="text"
-              value={coords.long}
-              onChange={(e) =>
-                setCoords({ ...coords, long: e.target.value })
-              }
-              className="w-full border rounded px-3 py-2"
-              placeholder="Например, 34.123"
-            />
-          </div>
-          <button
-            onClick={handleAnalyze}
-            className="inline-flex items-center bg-blue-600 text-white px-5 py-2 rounded self-end"
-          >
-            <MagnifyingGlassIcon className="w-5 h-5 mr-2" />
-            Анализировать
-          </button>
-        </div>
-      </section>
-
-      {result && (
-        <section className="space-y-6">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-medium text-black mb-4 flex items-center">
-              <ChartBarIcon className="w-6 h-6 text-gray-600 mr-2" />
-              Профиль высот
-            </h3>
-            <div className="grid grid-cols-3 gap-4 text-center">
-              {result.relief.elevationProfile.map((h, idx) => (
-                <div key={idx} className="p-3 bg-gray-100 rounded">
-                  <p className="font-medium text-black">{h} m</p>
-                  <p className="text-xs text-gray-500">
-                    Точка {idx + 1}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-medium text-black mb-4 flex items-center">
-              <CubeIcon className="w-6 h-6 text-gray-600 mr-2" />
-              Ресурсы на участке
-            </h3>
-            <ul className="space-y-2">
-              {result.resources.map((r, i) => (
-                <li
-                  key={i}
-                  className="flex justify-between border-b pb-2"
-                >
-                  <span className="text-black">{r.name}</span>
-                  <span className="font-medium text-black">
-                    {r.abundance}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-medium text-black mb-4 flex items-center">
-              <ExclamationTriangleIcon
-                className="w-6 h-6 text-gray-600 mr-2"
-              />
-              Обнаруженные опасности
-            </h3>
-            <ul className="space-y-2">
-              {result.dangers.map((d, i) => (
-                <li
-                  key={i}
-                  className="flex justify-between items-center"
-                >
-                  <span className="text-black">{d.type}</span>
-                  <span
-                    className={`px-2 py-0.5 text-xs font-medium rounded-full ${severityBadge(
-                      d.severity
-                    )}`}
-                  >
-                    {d.severity === 'low' && 'Низкая'}
-                    {d.severity === 'medium' && 'Средняя'}
-                    {d.severity === 'high' && 'Высокая'}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="text-right">
-            <button
-              onClick={handleSave}
-              disabled={saved}
-              className={`inline-flex items-center px-6 py-2 rounded ${
-                saved
-                  ? 'bg-gray-300 text-gray-600 cursor-default'
-                  : 'bg-green-600 text-white'
-              }`}
-            >
-              <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
-              {saved ? 'Сохранено' : 'Сохранить данные'}
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="relative flex-1 bg-white rounded-lg shadow h-96 overflow-hidden">
+          <div className="absolute inset-0 bg-gray-200" />
+          <div className="absolute top-2 right-2 flex flex-col space-y-2">
+            <button className="bg-white p-1 rounded shadow">
+              <PlusIcon className="w-4 h-4" />
+            </button>
+            <button className="bg-white p-1 rounded shadow">
+              <MinusIcon className="w-4 h-4" />
             </button>
           </div>
-        </section>
-      )}
+          {zones.map((zone) => (
+            <div
+              key={zone.id}
+              className={`absolute border-2 ${zone.color} rounded`}
+              style={{
+                top: zone.top,
+                left: zone.left,
+                width: zone.width,
+                height: zone.height,
+              }}
+            >
+              <span className="absolute -top-5 left-0 bg-white text-xs px-1 rounded shadow">
+                {zone.name}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
+          <h2 className="text-lg font-medium">Координаты</h2>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm mb-1">Широта</label>
+              <input
+                type="text"
+                value={coords.lat}
+                onChange={(e) => setCoords({ ...coords, lat: e.target.value })}
+                className="w-full border rounded px-3 py-2"
+                placeholder="Например, 14.657"
+              />
+            </div>
+            <div>
+              <label className="block text-sm mb-1">Долгота</label>
+              <input
+                type="text"
+                value={coords.long}
+                onChange={(e) => setCoords({ ...coords, long: e.target.value })}
+                className="w-full border rounded px-3 py-2"
+                placeholder="Например, 34.123"
+              />
+            </div>
+          </div>
+          <div className="flex space-x-2 pt-4">
+            <button className="flex-1 inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded">
+              <MagnifyingGlassIcon className="w-5 h-5 mr-2" /> Анализировать
+            </button>
+            <button className="flex-1 inline-flex items-center justify-center bg-gray-200 text-gray-700 px-4 py-2 rounded">
+              <XMarkIcon className="w-5 h-5 mr-2" /> Сброс
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          <h3 className="text-lg font-medium flex items-center">
+            <CubeIcon className="w-6 h-6 text-gray-600 mr-2" />
+            Распределение ресурсов
+          </h3>
+          {resources.map((r, i) => (
+            <div key={i} className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span>{r.name}</span>
+                <span>{r.percentage}%</span>
+              </div>
+              <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
+                <div className={`${r.color} h-2`} style={{ width: `${r.percentage}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          <h3 className="text-lg font-medium flex items-center">
+            <ExclamationTriangleIcon className="w-6 h-6 text-gray-600 mr-2" />
+            Оценка рисков
+          </h3>
+          {risks.map((risk, i) => {
+            const color =
+              risk.level === 'low'
+                ? 'bg-green-500'
+                : risk.level === 'medium'
+                ? 'bg-yellow-500'
+                : 'bg-red-500';
+            return (
+              <div key={i} className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span>{risk.name}</span>
+                  <span className="capitalize">{risk.level}</span>
+                </div>
+                <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
+                  <div className={`${color} h-2`} style={{ width: `${risk.percent}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-medium mb-4">История анализов</h3>
+        <table className="w-full text-left">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2 text-sm font-medium">Дата</th>
+              <th className="py-2 text-sm font-medium">Координаты</th>
+              <th className="py-2 text-sm font-medium">Результат</th>
+              <th className="py-2 text-sm font-medium">Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {history.map((entry) => (
+              <tr key={entry.id} className="border-b even:bg-gray-50">
+                <td className="py-2 text-sm">{entry.date}</td>
+                <td className="py-2 text-sm">{entry.coords}</td>
+                <td className="py-2 text-sm">{entry.summary}</td>
+                <td className="py-2 text-sm space-x-2">
+                  <button className="inline-flex items-center text-gray-600 hover:text-gray-800">
+                    <EyeIcon className="w-5 h-5" />
+                  </button>
+                  <button className="inline-flex items-center text-red-600 hover:text-red-800">
+                    <TrashIcon className="w-5 h-5" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
