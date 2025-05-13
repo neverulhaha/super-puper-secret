@@ -52,6 +52,7 @@ export default function ResourcesPage() {
         <h1 className="text-2xl font-semibold">Управление ресурсами</h1>
         <button className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded">Обновить данные</button>
       </header>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {summaryMetrics.map(m => (
           <div key={m.key} className="bg-white rounded-lg shadow p-4 flex items-center space-x-4">
@@ -66,6 +67,7 @@ export default function ResourcesPage() {
           </div>
         ))}
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-medium">Распределение ресурсов</h2>
@@ -96,30 +98,32 @@ export default function ResourcesPage() {
           ))}
         </div>
       </div>
+
       <div className="bg-white rounded-lg shadow overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="p-3 text-left">Модуль</th>
-              <th className="p-3">Вода, %</th>
-              <th className="p-3">Кислород, %</th>
-              <th className="p-3">Водород, %</th>
-              <th className="p-3">Энергия, %</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Модуль</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Вода, %</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Кислород, %</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Водород, %</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Энергия, %</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white divide-y divide-gray-200">
             {tableData.map(td => (
-              <tr key={td.module} className="border-b even:bg-gray-50">
-                <td className="p-3">{td.module}</td>
-                <td className="p-3">{td.water}%</td>
-                <td className="p-3">{td.oxygen}%</td>
-                <td className="p-3">{td.hydrogen}%</td>
-                <td className="p-3">{td.energy}%</td>
+              <tr key={td.module}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{td.module}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{td.water}%</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{td.oxygen}%</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{td.hydrogen}%</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{td.energy}%</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {sustainabilityMetrics.map(sm => (
           <div key={sm.name} className="bg-white rounded-lg shadow p-4 flex flex-col space-y-2">
