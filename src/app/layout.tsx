@@ -10,6 +10,11 @@ const montserrat = Montserrat({ subsets: ['latin'], weight: ['400', '600', '700'
 export const metadata: Metadata = {
   title: 'Лунная база',
   description: 'Управление инфраструктурой на Луне',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico'
+  }
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

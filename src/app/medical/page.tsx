@@ -45,9 +45,9 @@ type Report = {
 
 export default function MedicinePage() {
   const [patients] = useState<Patient[]>([
-    { id: 1, name: 'Лесный Егор Ильич', role: 'Командир миссии', heartRate: 72, temperature: 36.6, bp: '120/80 мм рт.ст.', spo2: 98, status: 'ok' },
-    { id: 2, name: 'Набеу Янгрик Егор Ильич', role: 'Научный сотрудник', heartRate: 85, temperature: 37.2, bp: '135/85 мм рт.ст.', spo2: 96, status: 'alert' },
-    { id: 3, name: 'Старый Егор Ильич', role: 'Медработник', heartRate: 68, temperature: 36.8, bp: '118/75 мм рт.ст.', spo2: 99, status: 'ok' },
+    { id: 1, name: 'Егор Ильин', role: 'Командир миссии', heartRate: 72, temperature: 36.6, bp: '120/80 мм рт.ст.', spo2: 98, status: 'ok' },
+    { id: 2, name: 'Егор Ильин', role: 'Научный сотрудник', heartRate: 85, temperature: 37.2, bp: '135/85 мм рт.ст.', spo2: 96, status: 'alert' },
+    { id: 3, name: 'Егор Ильин', role: 'Медработник', heartRate: 68, temperature: 36.8, bp: '118/75 мм рт.ст.', spo2: 99, status: 'ok' },
   ]);
   const [protocols] = useState<Protocol[]>([
     { id: 1, title: 'Ежедневный осмотр здоровья', category: 'Общий', description: 'Стандартный мониторинг жизненных показателей', nextDue: '2 часа', status: 'ok' },
