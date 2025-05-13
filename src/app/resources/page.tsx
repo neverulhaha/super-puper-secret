@@ -1,176 +1,137 @@
 // app/resources/page.tsx
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  BeakerIcon,
-  FireIcon,
+  CloudArrowDownIcon,
   SparklesIcon,
-  ArrowUpTrayIcon,
-  DocumentTextIcon,
+  BoltIcon,
+  FireIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
 } from '@heroicons/react/24/outline';
 
-type Resource = {
-  key: string;
-  name: string;
-  icon: React.ReactNode;
-  available: number;
-  unit: string;
-};
+const summaryMetrics = [
+  { key: 'water', name: 'Вода', icon: <CloudArrowDownIcon className="w-6 h-6 text-blue-500" />, value: 80, color: 'bg-blue-500' },
+  { key: 'oxygen', name: 'Кислород', icon: <SparklesIcon className="w-6 h-6 text-green-500" />, value: 95, color: 'bg-green-500' },
+  { key: 'energy', name: 'Энергия', icon: <BoltIcon className="w-6 h-6 text-yellow-500" />, value: 60, color: 'bg-yellow-500' },
+  { key: 'hydrogen', name: 'Водород', icon: <FireIcon className="w-6 h-6 text-red-500" />, value: 50, color: 'bg-red-500' },
+];
 
-type Allocation = {
-  module: string;
-  water: number;
-  oxygen: number;
-  hydrogen: number;
-};
+const moduleDistributions = [
+  { name: 'Жилые модули', water: 30, oxygen: 50, hydrogen: 20 },
+  { name: 'Лаборатория', water: 25, oxygen: 60, hydrogen: 15 },
+  { name: 'Промышленность', water: 40, oxygen: 30, hydrogen: 30 },
+  { name: 'Складские помещения', water: 20, oxygen: 40, hydrogen: 40 },
+];
 
-type NumericKey = 'water' | 'oxygen' | 'hydrogen';
+const resourceStats = [
+  { name: 'Всего ресурсов', value: '2.31 млн', change: 3.2, up: true },
+  { name: 'Эффективность переработки', value: '94.5 %', change: -1.1, up: false },
+  { name: 'Потоки ресурсов', value: '0.8 %', change: 0.5, up: true },
+  { name: 'Осталось ресурсов', value: '85 %', change: -2.0, up: false },
+];
+
+const tableData = [
+  { module: 'Жилые модули', water: 25, oxygen: 35, hydrogen: 30, energy: 10 },
+  { module: 'Лаборатория', water: 20, oxygen: 40, hydrogen: 25, energy: 15 },
+  { module: 'Промышленность', water: 30, oxygen: 30, hydrogen: 20, energy: 20 },
+  { module: 'Складские помещения', water: 15, oxygen: 25, hydrogen: 30, energy: 30 },
+];
+
+const sustainabilityMetrics = [
+  { name: 'Распределение ресурсов', value: 99.5, change: 1.2, up: true },
+  { name: 'Энергоэффективность', value: 92.5, change: 5.4, up: true },
+  { name: 'Сохранение ресурсов', value: 88.2, change: -3.4, up: false },
+  { name: 'Оптимизация системы', value: 91.0, change: 4.2, up: true },
+];
 
 export default function ResourcesPage() {
-  const [resources, setResources] = useState<Resource[]>([
-    { key: 'water', name: 'Вода', icon: <BeakerIcon className="w-6 h-6 text-blue-600" />, available: 1000, unit: 'л' },
-    { key: 'oxygen', name: 'Кислород', icon: <SparklesIcon className="w-6 h-6 text-green-600" />, available: 500, unit: 'м³' },
-    { key: 'hydrogen', name: 'Водород', icon: <FireIcon className="w-6 h-6 text-purple-600" />, available: 200, unit: 'кг' },
-  ]);
-  const [allocations, setAllocations] = useState<Allocation[]>([
-    { module: 'Модуль A', water: 300, oxygen: 120, hydrogen: 50 },
-    { module: 'Лаборатория', water: 200, oxygen: 80, hydrogen: 30 },
-    { module: 'Космодром', water: 150, oxygen: 60, hydrogen: 20 },
-  ]);
-
-  const handleResourceChange = (key: string, value: number) => {
-    setResources(resources.map(r => r.key === key ? { ...r, available: value } : r));
-  };
-
-  const handleAllocationChange = (idx: number, field: NumericKey, value: number) => {
-    const newAlloc = [...allocations];
-    newAlloc[idx][field] = value;
-    setAllocations(newAlloc);
-  };
-
-  const totalUsed = (field: NumericKey) => allocations.reduce((sum, a) => sum + a[field], 0);
-
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
       <header className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Управление ресурсами</h1>
-        <div className="space-x-2">
-          <button className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded">
-            <ArrowUpTrayIcon className="w-5 h-5 mr-1" /> Сохранить
-          </button>
-          <button className="inline-flex items-center bg-gray-200 text-gray-700 px-4 py-2 rounded">
-            <DocumentTextIcon className="w-5 h-5 mr-1" /> Отчёт
-          </button>
-        </div>
+        <button className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded">Обновить данные</button>
       </header>
-
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {resources.map(r => (
-          <div key={r.key} className="bg-white rounded-lg shadow p-6 space-y-4">
-            <div className="flex items-center space-x-3">
-              {r.icon}
-              <h2 className="text-lg font-medium">{r.name}</h2>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="number"
-                value={r.available}
-                onChange={e => handleResourceChange(r.key, Number(e.target.value))}
-                className="w-full border rounded px-3 py-2"
-              />
-              <span>{r.unit}</span>
-            </div>
-            <div className="text-sm text-gray-500">
-              Всего доступно: {r.available} {r.unit}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {summaryMetrics.map(m => (
+          <div key={m.key} className="bg-white rounded-lg shadow p-4 flex items-center space-x-4">
+            {m.icon}
+            <div className="flex-1">
+              <div className="text-sm text-gray-500">{m.name}</div>
+              <div className="text-xl font-medium">{m.value}%</div>
+              <div className="w-full bg-gray-200 h-2 rounded mt-1">
+                <div className={`${m.color} h-2 rounded`} style={{ width: `${m.value}%` }} />
+              </div>
             </div>
           </div>
         ))}
-      </section>
-
-      <section className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-medium mb-4">Распределение между модулями</h2>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          <h2 className="text-lg font-medium">Распределение ресурсов</h2>
+          {moduleDistributions.map(md => (
+            <div key={md.name} className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span>{md.name}</span>
+              </div>
+              <div className="w-full bg-gray-200 h-2 rounded overflow-hidden flex">
+                <div className="bg-blue-500 h-2" style={{ width: `${md.water}%` }} />
+                <div className="bg-green-500 h-2" style={{ width: `${md.oxygen}%` }} />
+                <div className="bg-red-500 h-2" style={{ width: `${md.hydrogen}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          <h2 className="text-lg font-medium">Статистика ресурсов</h2>
+          {resourceStats.map(rs => (
+            <div key={rs.name} className="flex justify-between items-center">
+              <span className="text-sm">{rs.name}</span>
+              <div className="flex items-center space-x-2">
+                <span className="font-medium">{rs.value}</span>
+                {rs.up ? <ArrowUpIcon className="w-4 h-4 text-green-500" /> : <ArrowDownIcon className="w-4 h-4 text-red-500" />}
+                <span className={`text-sm ${rs.up ? 'text-green-500' : 'text-red-500'}`}>{Math.abs(rs.change)}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="py-2">Модуль</th>
-              <th className="py-2">Вода (л)</th>
-              <th className="py-2">Кислород (м³)</th>
-              <th className="py-2">Водород (кг)</th>
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left">Модуль</th>
+              <th className="p-3">Вода, %</th>
+              <th className="p-3">Кислород, %</th>
+              <th className="p-3">Водород, %</th>
+              <th className="p-3">Энергия, %</th>
             </tr>
           </thead>
           <tbody>
-            {allocations.map((a, i) => (
-              <tr key={i} className="border-b even:bg-gray-50">
-                <td className="py-2">{a.module}</td>
-                <td className="py-2">
-                  <input
-                    type="number"
-                    value={a.water}
-                    onChange={e => handleAllocationChange(i, 'water', Number(e.target.value))}
-                    className="w-20 border rounded px-2 py-1"
-                  />
-                </td>
-                <td className="py-2">
-                  <input
-                    type="number"
-                    value={a.oxygen}
-                    onChange={e => handleAllocationChange(i, 'oxygen', Number(e.target.value))}
-                    className="w-20 border rounded px-2 py-1"
-                  />
-                </td>
-                <td className="py-2">
-                  <input
-                    type="number"
-                    value={a.hydrogen}
-                    onChange={e => handleAllocationChange(i, 'hydrogen', Number(e.target.value))}
-                    className="w-20 border rounded px-2 py-1"
-                  />
-                </td>
+            {tableData.map(td => (
+              <tr key={td.module} className="border-b even:bg-gray-50">
+                <td className="p-3">{td.module}</td>
+                <td className="p-3">{td.water}%</td>
+                <td className="p-3">{td.oxygen}%</td>
+                <td className="p-3">{td.hydrogen}%</td>
+                <td className="p-3">{td.energy}%</td>
               </tr>
             ))}
-            <tr className="font-medium">
-              <td className="py-2">Итого</td>
-              <td className="py-2">{totalUsed('water')}</td>
-              <td className="py-2">{totalUsed('oxygen')}</td>
-              <td className="py-2">{totalUsed('hydrogen')}</td>
-            </tr>
           </tbody>
         </table>
-      </section>
-
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h3 className="text-lg font-medium">Показатели устойчивости</h3>
-          {[
-            ['Рециркуляция воды', 85],
-            ['Консервация кислорода', 92],
-            ['Производство водорода', 78],
-          ].map(([label, value], i) => (
-            <div key={i} className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span>{label}</span>
-                <span>{value}%</span>
-              </div>
-              <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
-                <div className="bg-green-500 h-2" style={{ width: `${value}%` }} />
-              </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {sustainabilityMetrics.map(sm => (
+          <div key={sm.name} className="bg-white rounded-lg shadow p-4 flex flex-col space-y-2">
+            <div className="text-sm text-gray-500">{sm.name}</div>
+            <div className="text-xl font-medium">{sm.value}%</div>
+            <div className="flex items-center space-x-1">
+              {sm.up ? <ArrowUpIcon className="w-4 h-4 text-green-500" /> : <ArrowDownIcon className="w-4 h-4 text-red-500" />}
+              <span className={`text-sm ${sm.up ? 'text-green-500' : 'text-red-500'}`}>{Math.abs(sm.change)}%</span>
             </div>
-          ))}
-        </div>
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h3 className="text-lg font-medium">Аналитика потребления</h3>
-          {[
-            ['Суточное потребление воды', 450, 'л'],
-            ['Суточное потребление O₂', 120, 'м³'],
-            ['Суточное потребление H₂', 30, 'кг'],
-          ].map(([label, value, unit], i) => (
-            <div key={i} className="flex justify-between text-sm">
-              <span>{label}</span>
-              <span className="font-medium">{value} {unit}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
