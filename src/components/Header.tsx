@@ -51,21 +51,24 @@ export function Header() {
             <Bell className="w-5 h-5 text-gray-600" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
           </button>
-          <div className="flex items-center gap-3">
+          <div
+            onClick={() => router.push('/profile')}
+            className="flex items-center gap-3 cursor-pointer rounded-lg hover:bg-gray-100 px-2 py-1"
+          >
             <span className="text-sm text-gray-600 truncate">{name}</span>
             <img
               src={avatar}
               alt="Аватар"
-              className="w-8 h-8 rounded-full cursor-pointer hover:opacity-80 transition-opacity"
+              className="w-8 h-8 rounded-full object-cover"
             />
-            <button
-              onClick={handleLogout}
-              className="p-2 hover:bg-gray-100 rounded-full"
-              aria-label="Выйти"
-            >
-              <LogOut className="w-5 h-5 text-gray-600" />
-            </button>
           </div>
+          <button
+            onClick={handleLogout}
+            className="p-2 hover:bg-gray-100 rounded-full"
+            aria-label="Выйти"
+          >
+            <LogOut className="w-5 h-5 text-gray-600" />
+          </button>
         </div>
       </div>
     </header>

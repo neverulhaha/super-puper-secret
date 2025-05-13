@@ -20,22 +20,22 @@ import {
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 const navigation = [
-  { name: 'Профиль',        icon: User,            href: '/profile' },
+  { name: 'Профиль', icon: User, href: '/profile' },
   { name: 'Панель управления', icon: LayoutDashboard, href: '/dashboard' },
-  { name: 'Анализ участка', icon: Map,             href: '/analysis' },
-  { name: 'Инфраструктура', icon: Building2,       href: '/infrastructure' },
-  { name: 'Ресурсы',        icon: Battery,         href: '/resources' },
-  { name: 'Навигация',      icon: Navigation,      href: '/navigation' },
-  { name: 'Управление роботами', icon: Bot,        href: '/robotics' },
-  { name: 'Медицина',       icon: Heart,           href: '/medical' },
+  { name: 'Анализ участка', icon: Map, href: '/analysis' },
+  { name: 'Инфраструктура', icon: Building2, href: '/infrastructure' },
+  { name: 'Ресурсы', icon: Battery, href: '/resources' },
+  { name: 'Навигация', icon: Navigation, href: '/navigation' },
+  { name: 'Управление роботами', icon: Bot, href: '/robotics' },
+  { name: 'Медицина', icon: Heart, href: '/medical' },
   { name: 'Администрирование', icon: ClipboardList, href: '/admin' },
-  { name: 'Безопасность',   icon: Shield,          href: '/security' },
-  { name: 'Аналитика',      icon: BarChart3,       href: '/analytics' },
+  { name: 'Безопасность', icon: Shield, href: '/security' },
+  { name: 'Аналитика', icon: BarChart3, href: '/analytics' },
 ]
 
 export function Sidebar() {
   const supabase = createClientComponentClient()
-  const [name, setName]     = useState('Пользователь')
+  const [name, setName] = useState('Пользователь')
   const [avatar, setAvatar] = useState('/photo/default.jpg')
   const pathname = usePathname()
 
@@ -57,7 +57,6 @@ export function Sidebar() {
         if (data.avatar_url) setAvatar(data.avatar_url)
       }
     }
-
     loadUser()
   }, [supabase])
 
@@ -81,7 +80,7 @@ export function Sidebar() {
               className={
                 `flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ` +
                 (isActive
-                  ? 'bg-gray-800 text-white'
+                  ? 'bg-blue-600 text-white'
                   : 'text-gray-300 hover:bg-gray-800 hover:text-white')
               }
             >

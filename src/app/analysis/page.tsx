@@ -58,7 +58,7 @@ export default function AnalysisPage() {
   ]);
   const [risks] = useState<RiskItem[]>([
     { name: 'Кратеры', level: 'medium', percent: 45 },
-    { name: 'Склоны >30°', level: 'high', percent: 75 },
+    { name: 'Склоны > 30°', level: 'high', percent: 75 },
     { name: 'Радиоактивность', level: 'low', percent: 15 },
   ]);
   const [history] = useState<HistoryEntry[]>([
@@ -193,10 +193,10 @@ export default function AnalysisPage() {
     <table>
       <thead>
         <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Координаты</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Результат</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+          <th>Дата</th>
+          <th>Координаты</th>
+          <th>Результат</th>
+          <th>Действия</th>
         </tr>
       </thead>
       <tbody>
@@ -206,10 +206,10 @@ export default function AnalysisPage() {
             <td>{entry.coords}</td>
             <td>{entry.summary}</td>
             <td className="flex space-x-2">
-              <button className="hover:text-gray-800">
+              <button>
                 <EyeIcon className="w-5 h-5 text-gray-600" />
               </button>
-              <button className="hover:text-red-800">
+              <button>
                 <TrashIcon className="w-5 h-5 text-red-600" />
               </button>
             </td>
@@ -219,6 +219,6 @@ export default function AnalysisPage() {
     </table>
   </div>
 </div>
-    </div>
+</div>
   );
 }
