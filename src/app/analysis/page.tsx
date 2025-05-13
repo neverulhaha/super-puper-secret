@@ -193,10 +193,10 @@ export default function AnalysisPage() {
     <table>
       <thead>
         <tr>
-          <th>Дата</th>
-          <th>Координаты</th>
-          <th>Результат</th>
-          <th>Действия</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Координаты</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Результат</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
         </tr>
       </thead>
       <tbody>
