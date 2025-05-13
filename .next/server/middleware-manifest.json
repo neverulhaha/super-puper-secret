@@ -1,33 +1,12 @@
 {
-  "sortedMiddleware": [
-    "/"
-  ],
-  "middleware": {
-    "/": {
-      "files": [
-        "prerender-manifest.js",
-        "server/edge-runtime-webpack.js",
-        "server/src/middleware.js"
-      ],
-      "name": "src/middleware",
-      "page": "/",
-      "matchers": [
-        {
-          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?\\/profile(?:\\/((?:[^\\/#\\?]+?)(?:\\/(?:[^\\/#\\?]+?))*))?(.json)?[\\/#\\?]?$",
-          "originalSource": "/profile/:path*"
-        }
-      ],
-      "wasm": [],
-      "assets": []
-    }
-  },
+  "sortedMiddleware": [],
+  "middleware": {},
   "functions": {
     "/api/login/route": {
       "files": [
         "server/middleware-build-manifest.js",
         "server/middleware-react-loadable-manifest.js",
         "server/next-font-manifest.js",
-        "prerender-manifest.js",
         "server/edge-runtime-webpack.js",
         "server/app/api/login/route.js"
       ],
@@ -37,26 +16,6 @@
         {
           "regexp": "^/api/login$",
           "originalSource": "/api/login"
-        }
-      ],
-      "wasm": [],
-      "assets": []
-    },
-    "/api/upload-avatar/route": {
-      "files": [
-        "server/middleware-build-manifest.js",
-        "server/middleware-react-loadable-manifest.js",
-        "server/next-font-manifest.js",
-        "prerender-manifest.js",
-        "server/edge-runtime-webpack.js",
-        "server/app/api/upload-avatar/route.js"
-      ],
-      "name": "app/api/upload-avatar/route",
-      "page": "/api/upload-avatar/route",
-      "matchers": [
-        {
-          "regexp": "^/api/upload\\-avatar$",
-          "originalSource": "/api/upload-avatar"
         }
       ],
       "wasm": [],

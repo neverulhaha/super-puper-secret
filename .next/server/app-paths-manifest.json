@@ -1,19 +1,5 @@
 {
   "/api/login/route": "app/api/login/route.js",
-  "/api/upload-avatar/route": "app/api/upload-avatar/route.js",
   "/page": "app/page.js",
-  "/confirmed/page": "app/confirmed/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/login/page": "app/login/page.js",
-  "/logout/page": "app/logout/page.js",
-  "/profile/page": "app/profile/page.js",
-  "/register/page": "app/register/page.js",
-  "/api/energy/route": "app/api/energy/route.js",
-  "/api/life-support/route": "app/api/life-support/route.js",
-  "/api/notifications/route": "app/api/notifications/route.js",
-  "/api/personnel/route": "app/api/personnel/route.js",
-  "/api/projects/route": "app/api/projects/route.js",
-  "/api/register/route": "app/api/register/route.js",
-  "/api/security-status/route": "app/api/security-status/route.js",
-  "/api/systems/route": "app/api/systems/route.js"
+  "/login/page": "app/login/page.js"
 }
