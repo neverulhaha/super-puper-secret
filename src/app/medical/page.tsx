@@ -154,27 +154,27 @@ export default function MedicinePage() {
         <table className="min-w-full text-sm divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2 text-left">Отчет</th>
-              <th className="px-4 py-2">Дата</th>
-              <th className="px-4 py-2">Тип</th>
-              <th className="px-4 py-2">Статус</th>
-              <th className="px-4 py-2">Работник</th>
-              <th className="px-4 py-2">Действия</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Отчет</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Работник</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {reports.map(r => (
               <tr key={r.id}>
-                <td className="px-4 py-2">{r.title}</td>
-                <td className="px-4 py-2">{r.date}</td>
-                <td className="px-4 py-2">{r.type}</td>
-                <td className="px-4 py-2">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{r.title}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{r.date}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{r.type}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     r.status === 'Выполнено' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'
                   }`}>{r.status}</span>
                 </td>
-                <td className="px-4 py-2">{r.worker}</td>
-                <td className="px-4 py-2 flex space-x-2">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{r.worker}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <EyeIcon className="w-5 h-5 text-gray-600 cursor-pointer" />
                   <ArrowDownTrayIcon className="w-5 h-5 text-gray-600 cursor-pointer" />
                 </td>
