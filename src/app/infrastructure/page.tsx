@@ -1,178 +1,220 @@
 'use client';
-
 import React, { useState } from 'react';
 import {
   HomeIcon,
   RocketLaunchIcon,
+  BeakerIcon,
   BoltIcon,
-  WifiIcon,
+  CubeIcon,
+  ArrowUpTrayIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
   Cog6ToothIcon,
-  MapIcon,
 } from '@heroicons/react/24/outline';
 
-type InfrastructureType = 
-  | 'Жилой модуль'
-  | 'Космодром'
-  | 'Энергетическая станция'
-  | 'Связь';
+type InfrastructureType = {
+  key: string;
+  name: string;
+  description: string;
+  range: string;
+  icon: React.ReactNode;
+  color: string;
+};
 
-interface ObjectParams {
-  type: InfrastructureType;
-  area: number;   
-  height: number;
-}
-
-interface Placement {
+type Placement = {
   id: number;
-  type: InfrastructureType;
-  x: string;      
+  x: string;
   y: string;
-  width: string;  
-  height: string; 
-}
+  w: string;
+  h: string;
+};
 
 export default function InfrastructurePage() {
-  const [params, setParams] = useState<ObjectParams>({
-    type: 'Жилой модуль',
-    area: 100,
-    height: 10,
-  });
+  const types: InfrastructureType[] = [
+    {
+      key: 'module',
+      name: 'Жилой модуль',
+      description: 'Для экипажа и жизнеобеспечения',
+      range: '100–300 м²',
+      icon: <HomeIcon className="w-5 h-5 text-blue-600" />,
+      color: 'border-blue-400',
+    },
+    {
+      key: 'launch',
+      name: 'Космодром',
+      description: 'Запуск и посадка ракет',
+      range: '1000–2000 м²',
+      icon: <RocketLaunchIcon className="w-5 h-5 text-purple-600" />,
+      color: 'border-purple-400',
+    },
+    {
+      key: 'lab',
+      name: 'Исследовательская лаборатория',
+      description: 'Анализ образцов и эксперименты',
+      range: '200–500 м²',
+      icon: <BeakerIcon className="w-5 h-5 text-green-600" />,
+      color: 'border-green-400',
+    },
+    {
+      key: 'power',
+      name: 'Электростанция',
+      description: 'Генерация энергии',
+      range: '300–1000 м²',
+      icon: <BoltIcon className="w-5 h-5 text-yellow-600" />,
+      color: 'border-yellow-400',
+    },
+    {
+      key: 'storage',
+      name: 'Хранилище',
+      description: 'Складские помещения',
+      range: '150–400 м²',
+      icon: <CubeIcon className="w-5 h-5 text-red-600" />,
+      color: 'border-red-400',
+    },
+  ];
+
+  const [selected, setSelected] = useState<string>(types[0].key);
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [calculated, setCalculated] = useState(false);
 
-  const iconForType = (type: InfrastructureType) => {
-    switch (type) {
-      case 'Жилой модуль':      return <HomeIcon className="w-6 h-6 text-blue-600" />;
-      case 'Космодром':         return <RocketLaunchIcon className="w-6 h-6 text-purple-600" />;
-      case 'Энергетическая станция': return <BoltIcon className="w-6 h-6 text-yellow-600" />;
-      case 'Связь':             return <WifiIcon className="w-6 h-6 text-green-600" />;
-      default:                   return <Cog6ToothIcon className="w-6 h-6 text-gray-600" />;
-    }
-  };
-
   const handleCalculate = () => {
-    const mock: Placement[] = Array.from({ length: 3 }, (_, i) => ({
+    const mock: Placement[] = types.slice(0, 3).map((_, i) => ({
       id: i + 1,
-      type: params.type,
-      x: `${10 + i * 25}%`,
-      y: `${20 + i * 15}%`,
-      width: `${20 + i * 5}%`,
-      height: `${10 + i * 5}%`,
+      x: `${10 + i * 30}%`,
+      y: `${15 + i * 20}%`,
+      w: `${20 + i * 10}%`,
+      h: `${15 + i * 5}%`,
     }));
     setPlacements(mock);
     setCalculated(true);
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
+    <div className="p-6 bg-gray-50 min-h-screen space-y-8 text-black">
       <header className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Планирование инфраструктуры</h1>
-        <button className="inline-flex items-center bg-gray-200 text-gray-700 px-3 py-1 rounded">
-          <MapIcon className="w-5 h-5 mr-1" />
-          Показать карту
-        </button>
-      </header>
-      <section className="bg-white rounded-lg shadow p-6 space-y-4">
-        <h2 className="text-lg font-medium">Параметры объекта</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm mb-1">Тип объекта</label>
-            <select
-              value={params.type}
-              onChange={e =>
-                setParams({ ...params, type: e.target.value as InfrastructureType })
-              }
-              className="w-full border rounded px-3 py-2"
-            >
-              <option>Жилой модуль</option>
-              <option>Космодром</option>
-              <option>Энергетическая станция</option>
-              <option>Связь</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Площадь (м²)</label>
-            <input
-              type="number"
-              min={10}
-              value={params.area}
-              onChange={e =>
-                setParams({ ...params, area: Number(e.target.value) })
-              }
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Высота (м)</label>
-            <input
-              type="number"
-              min={1}
-              value={params.height}
-              onChange={e =>
-                setParams({ ...params, height: Number(e.target.value) })
-              }
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-        </div>
-        <div className="text-right">
-          <button
-            onClick={handleCalculate}
-            className="inline-flex items-center bg-blue-600 text-white px-5 py-2 rounded"
-          >
-            Рассчитать расположение
+        <div className="space-x-2">
+          <button className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded">
+            <Cog6ToothIcon className="w-5 h-5 mr-1" /> Сохранить макет
+          </button>
+          <button className="inline-flex items-center bg-gray-200 text-gray-700 px-4 py-2 rounded">
+            <ArrowUpTrayIcon className="w-5 h-5 mr-1" /> Экспортировать
           </button>
         </div>
-      </section>
-
-      {calculated && (
-        <section className="space-y-4">
-          <div className="relative bg-white rounded-lg shadow h-96 overflow-hidden">
-            <div className="absolute inset-0 bg-gray-200" />
-            {placements.map(place => (
+      </header>
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="relative flex-1 bg-white rounded-lg shadow h-96 overflow-hidden">
+          <div className="absolute inset-0 bg-gray-200" />
+          <div className="absolute top-2 right-2 flex flex-col space-y-2">
+            <button className="bg-white p-1 rounded shadow">
+              <ArrowUpIcon className="w-4 h-4" />
+            </button>
+            <button className="bg-white p-1 rounded shadow">
+              <ArrowDownIcon className="w-4 h-4" />
+            </button>
+          </div>
+          {calculated &&
+            placements.map((p) => (
               <div
-                key={place.id}
-                className="absolute border-2 border-dashed rounded flex items-center justify-center bg-white/60"
-                style={{
-                  top: place.y,
-                  left: place.x,
-                  width: place.width,
-                  height: place.height,
-                }}
+                key={p.id}
+                className={`absolute border-2 border-dashed bg-white/50 rounded ${types.find(t => t.key === selected)?.color}`}
+                style={{ top: p.y, left: p.x, width: p.w, height: p.h }}
               >
-                {iconForType(place.type)}
+                {types.find(t => t.key === selected)?.icon}
+              </div>
+            ))}
+        </div>
+        <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
+          <h2 className="text-lg font-medium">Планирование объекта</h2>
+          <div className="space-y-2">
+            {types.map((t) => (
+              <div
+                key={t.key}
+                className={`flex items-center justify-between p-3 border rounded cursor-pointer ${selected === t.key ? 'border-blue-400 bg-blue-50' : 'border-gray-200'}`}
+                onClick={() => setSelected(t.key)}
+              >
+                <div className="flex items-center space-x-3">
+                  {t.icon}
+                  <div>
+                    <p className="font-medium">{t.name}</p>
+                    <p className="text-sm text-gray-500">{t.description}</p>
+                  </div>
+                </div>
+                <span className="text-sm text-gray-700">{t.range}</span>
               </div>
             ))}
           </div>
-          <div className="bg-white rounded-lg shadow p-6 space-y-2">
-            <h3 className="text-lg font-medium">Результаты расчёта</h3>
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-2">ID</th>
-                  <th className="py-2">Тип</th>
-                  <th className="py-2">Позиция</th>
-                  <th className="py-2">Размеры</th>
-                </tr>
-              </thead>
-              <tbody>
-                {placements.map(pl => (
-                  <tr key={pl.id} className="border-b even:bg-gray-50">
-                    <td className="py-2">{pl.id}</td>
-                    <td className="py-2">{pl.type}</td>
-                    <td className="py-2">
-                      {pl.x} / {pl.y}
-                    </td>
-                    <td className="py-2">
-                      {pl.width} × {pl.height}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="flex space-x-2 pt-4">
+            <button
+              onClick={handleCalculate}
+              className="flex-1 inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Рассчитать
+            </button>
+            <button className="flex-1 inline-flex items-center justify-center bg-gray-200 text-gray-700 px-4 py-2 rounded">
+              Сброс
+            </button>
           </div>
-        </section>
-      )}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Анализ безопасности</h3>
+            <span className="text-sm text-blue-600">Детали &gt;</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Общая безопасность</span>
+            <span className="font-medium">88%</span>
+          </div>
+          {[
+            ['Структурная целостность', 98],
+            ['Радиационная безопасность', 87],
+            ['Аварийный доступ', 95],
+            ['Распределение ресурсов', 72],
+          ].map(([label, value], i) => (
+            <div key={i} className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span>{label}</span>
+                <span>{value}%</span>
+              </div>
+              <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
+                <div className="bg-blue-500 h-2" style={{ width: `${value}%` }} />
+              </div>
+            </div>
+          ))}
+          <ul className="list-disc list-inside text-sm text-gray-600 space-y-1 pt-2">
+            <li>Усилить радиационную защиту исследовательской лаборатории</li>
+            <li>Обеспечить аварийные выходы у всех модулей</li>
+          </ul>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Результаты оптимизации</h3>
+            <span className="text-sm font-medium text-green-600">94%</span>
+          </div>
+          {[
+            ['Использование площадей', 85, true],
+            ['Эффективность ресурсов', 92, true],
+            ['Среднее расстояние', 120, false],
+            ['Оценка безопасности', 95, true],
+          ].map(([label, value, up], i) => (
+            <div key={i} className="flex items-center justify-between text-sm">
+              <span>{label}</span>
+              <div className="flex items-center space-x-1">
+                <span className="font-medium">{value}{label === 'Среднее расстояние' ? ' M' : '%'}</span>
+                {typeof up === 'boolean' && (
+                  up ? <ArrowUpIcon className="w-4 h-4 text-green-600" /> : <ArrowDownIcon className="w-4 h-4 text-red-600" />
+                )}
+              </div>
+            </div>
+          ))}
+          <div className="flex space-x-2 pt-4">
+            <button className="flex-1 bg-green-600 text-white px-4 py-2 rounded">Применить</button>
+            <button className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded">Пересчитать</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
