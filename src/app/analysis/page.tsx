@@ -202,9 +202,9 @@ export default function AnalysisPage() {
       <tbody>
         {history.map(entry => (
           <tr key={entry.id}>
-            <td>{entry.date}</td>
-            <td>{entry.coords}</td>
-            <td>{entry.summary}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.date}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.coords}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.summary}</td>
             <td className="flex space-x-2">
               <button>
                 <EyeIcon className="w-5 h-5 text-gray-600" />
