@@ -23,7 +23,7 @@ export default function LunarMap() {
     >
       <TileLayer
         attribution="NASA MoonTrek"
-        url="https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/{z}/{x}/{y}.png"
+        url="https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0//default/default028mm/{z}/{x}/{y}.jpg"
         maxZoom={7}
         minZoom={0}
         noWrap={true}
