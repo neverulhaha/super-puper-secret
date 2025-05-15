@@ -47,11 +47,11 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
     const starSphere = new THREE.Mesh(starGeometry, starMaterial);
     scene.add(starSphere);
 
-    const light = new THREE.DirectionalLight(0xffffff, 0.6);
+    const light = new THREE.DirectionalLight(0xffffff, 0.4);
     light.position.set(5, 3, 5);
     scene.add(light);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); 
     scene.add(ambientLight);
 
     const loader = new THREE.TextureLoader();
@@ -67,8 +67,8 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
 
-    controls.minDistance = 1;
-    controls.maxDistance = 5;
+    controls.minDistance = 2;
+    controls.maxDistance = 3;
 
     controlsRef.current = controls;
 
