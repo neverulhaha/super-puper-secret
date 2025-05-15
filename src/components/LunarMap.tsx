@@ -12,6 +12,7 @@ const mapStyle = {
 export default function LunarMap() {
   return (
     <MapContainer
+        className="w-full h-full rounded-2xl shadow"
       center={[0, 0]}
       zoom={2}
       minZoom={0}

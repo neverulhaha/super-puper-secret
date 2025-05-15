@@ -86,35 +86,29 @@ export default function AnalysisPage() {
       </header>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="relative flex-1 bg-white rounded-lg shadow overflow-hidden h-96">
-          <div className="absolute inset-0">
-            <LunarMap />
-          </div>
-          <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
-            <button className="bg-white p-1 rounded shadow">
-              <PlusIcon className="w-4 h-4" />
-            </button>
-            <button className="bg-white p-1 rounded shadow">
-              <MinusIcon className="w-4 h-4" />
-            </button>
-          </div>
-          {zones.map((zone) => (
-            <div
-              key={zone.id}
-              className={`absolute border-2 ${zone.color} rounded z-10`}
-              style={{
-                top: zone.top,
-                left: zone.left,
-                width: zone.width,
-                height: zone.height,
-              }}
-            >
-              <span className="absolute -top-5 left-0 bg-white text-xs px-1 rounded shadow">
-                {zone.name}
-              </span>
-            </div>
-          ))}
-        </div>
+        <div className="relative flex-1 bg-white rounded-lg shadow overflow-hidden h-96 flex items-stretch">
+  <div className="w-full h-full">
+    <LunarMap />
+  </div>
+  <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
+  </div>
+  {zones.map((zone) => (
+    <div
+      key={zone.id}
+      className={`absolute border-2 ${zone.color} rounded z-10`}
+      style={{
+        top: zone.top,
+        left: zone.left,
+        width: zone.width,
+        height: zone.height,
+      }}
+    >
+      <span className="absolute -top-5 left-0 bg-white text-xs px-1 rounded shadow">
+        {zone.name}
+      </span>
+    </div>
+  ))}
+</div>
         <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-medium">Координаты</h2>
           <div className="space-y-3">
