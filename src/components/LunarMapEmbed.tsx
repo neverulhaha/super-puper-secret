@@ -1,21 +1,19 @@
-"use client";
-import React from "react";
+'use client';
+
+import React from 'react';
 
 export default function LunarMapEmbed() {
   return (
-    <div className="w-full h-[400px] rounded-2xl overflow-hidden shadow mb-6">
+    <div className="w-full h-[400px] lg:h-full">
       <iframe
-        src="https://pilot.wr.usgs.gov/#polygon"
-        title="USGS Moon Image Database"
+        src="https://www.google.com/maps/space/moon/"
+        title="Лунная карта Google"
         width="100%"
         height="100%"
-        style={{
-          border: 0,
-          minHeight: 400,
-          width: "100%",
-          height: "100%",
-        }}
+        className="w-full h-full border-none rounded-lg"
         allowFullScreen
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
       />
     </div>
   );
