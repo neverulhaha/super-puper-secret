@@ -1,224 +1,269 @@
 'use client';
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import {
-  PlusIcon,
-  MinusIcon,
-  ArrowUpTrayIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  ClockIcon,
+  SparklesIcon,
+  ShieldCheckIcon,
+  HomeIcon,
+  BeakerIcon,
+  BoltIcon,
   CubeIcon,
-  ExclamationTriangleIcon,
-  EyeIcon,
-  TrashIcon,
+  LightBulbIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 
-type Zone = {
+// Ленивая подгрузка карты для поддержки SSR в Next.js
+const LunarMap = dynamic(() => import('@/components/LunarMap'), { ssr: false });
+
+interface Summary {
   id: number;
-  name: string;
-  color: string;
-  top: string;
-  left: string;
-  width: string;
-  height: string;
-};
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+}
 
-type ResourceDistribution = {
-  name: string;
-  percentage: number;
-  color: string;
-};
+interface SectionMetric {
+  label: string;
+  value: string;
+}
 
-type RiskItem = {
-  name: string;
-  level: 'low' | 'medium' | 'high';
-  percent: number;
-};
-
-type HistoryEntry = {
+interface Section {
   id: number;
-  date: string;
-  coords: string;
-  summary: string;
-};
+  title: string;
+  icon: React.ReactNode;
+  metrics: SectionMetric[];
+  overall: string;
+  trend: 'Повышение' | 'Стабильно';
+}
+
+interface ResourceItem {
+  id: number;
+  title: string;
+  icon: React.ReactNode;
+  current: string;
+  target: string;
+  efficiency: string;
+}
+
+interface Suggestion {
+  id: number;
+  title: string;
+  desc: string;
+  resourceGain: string;
+  efficiencyGain: string;
+  timeline: string;
+  impact: 'Сильное влияние' | 'Среднее влияние';
+}
 
 export default function AnalysisPage() {
-  const [zones] = useState<Zone[]>([
-    { id: 1, name: 'Зона A', color: 'border-blue-400', top: '10%', left: '10%', width: '30%', height: '25%' },
-    { id: 2, name: 'Зона B', color: 'border-green-400', top: '50%', left: '20%', width: '25%', height: '30%' },
-    { id: 3, name: 'Зона C', color: 'border-purple-400', top: '30%', left: '60%', width: '30%', height: '20%' },
+  const [summary] = useState<Summary[]>([
+    { id: 1, title: 'Общая эффективность', value: '94.5%', icon: <ArrowTrendingUpIcon className="w-6 h-6 text-green-500" /> },
+    { id: 2, title: 'Время безотказной работы', value: '99.9%', icon: <ClockIcon className="w-6 h-6 text-blue-500" /> },
+    { id: 3, title: 'Оптимизация ресурсов', value: '92.8%', icon: <SparklesIcon className="w-6 h-6 text-purple-500" /> },
+    { id: 4, title: 'Рейтинг безопасности', value: '98.2%', icon: <ShieldCheckIcon className="w-6 h-6 text-yellow-500" /> },
   ]);
 
-  const [coords, setCoords] = useState({ lat: '', long: '' });
-  const [resources] = useState<ResourceDistribution[]>([
-    { name: 'Гелий-3', percentage: 12.3, color: 'bg-blue-500' },
-    { name: 'Титан', percentage: 25.8, color: 'bg-green-500' },
-    { name: 'Кремний', percentage: 61.9, color: 'bg-yellow-500' },
+  const [sections] = useState<Section[]>([
+    {
+      id: 1, title: 'Жилые модули', icon: <HomeIcon className="w-6 h-6 text-blue-500" />,
+      metrics: [
+        { label: 'Использование', value: '85%' },
+        { label: 'Обслуживание', value: '95%' },
+        { label: 'Производительность', value: '88%' },
+      ],
+      overall: '+ Повышение', trend: 'Повышение',
+    },
+    {
+      id: 2, title: 'Исследовательские лаборатории', icon: <BeakerIcon className="w-6 h-6 text-indigo-500" />,
+      metrics: [
+        { label: 'Использование', value: '78%' },
+        { label: 'Обслуживание', value: '92%' },
+        { label: 'Производительность', value: '85%' },
+      ],
+      overall: '+ Стабильно', trend: 'Стабильно',
+    },
+    {
+      id: 3, title: 'Системы электропитания', icon: <BoltIcon className="w-6 h-6 text-yellow-500" />,
+      metrics: [
+        { label: 'Использование', value: '92%' },
+        { label: 'Обслуживание', value: '88%' },
+        { label: 'Производительность', value: '90%' },
+      ],
+      overall: '+ Повышение', trend: 'Повышение',
+    },
+    {
+      id: 4, title: 'Жизнеобеспечение', icon: <SparklesIcon className="w-6 h-6 text-green-500" />,
+      metrics: [
+        { label: 'Использование', value: '75%' },
+        { label: 'Обслуживание', value: '96%' },
+        { label: 'Производительность', value: '94%' },
+      ],
+      overall: '+ Повышение', trend: 'Повышение',
+    },
   ]);
-  const [risks] = useState<RiskItem[]>([
-    { name: 'Кратеры', level: 'medium', percent: 45 },
-    { name: 'Склоны > 30°', level: 'high', percent: 75 },
-    { name: 'Радиоактивность', level: 'low', percent: 15 },
+
+  const [resources] = useState<ResourceItem[]>([
+    {
+      id: 1, title: 'Водные ресурсы', icon: <CubeIcon className="w-6 h-6 text-teal-500" />,
+      current: '85%', target: '80%', efficiency: '92%',
+    },
+    {
+      id: 2, title: 'Подача кислорода', icon: <SparklesIcon className="w-6 h-6 text-blue-500" />,
+      current: '95%', target: '90%', efficiency: '96%',
+    },
+    {
+      id: 3, title: 'Энергопотребление', icon: <BoltIcon className="w-6 h-6 text-yellow-500" />,
+      current: '78%', target: '75%', efficiency: '88%',
+    },
+    {
+      id: 4, title: 'Вместимость хранилища', icon: <CubeIcon className="w-6 h-6 text-purple-500" />,
+      current: '82%', target: '85%', efficiency: '90%',
+    },
   ]);
-  const [history] = useState<HistoryEntry[]>([
-    { id: 1, date: '2025-05-12', coords: '14.657°, 34.123°', summary: 'Низкая опасность' },
-    { id: 2, date: '2025-05-10', coords: '15.002°, 33.987°', summary: 'Средняя опасность' },
-    { id: 3, date: '2025-05-08', coords: '14.123°, 34.456°', summary: 'Высокая опасность' },
+
+  const [suggestions] = useState<Suggestion[]>([
+    {
+      id: 1,
+      title: 'Оптимизация системы рециркуляции воды',
+      desc: 'Внедрение усовершенствованной системы фильтрации для повышения эффективности переработки на 5%',
+      resourceGain: '15%',
+      efficiencyGain: '8%',
+      timeline: '3 месяца',
+      impact: 'Сильное влияние',
+    },
+    {
+      id: 2,
+      title: 'Перестановка массива солнечных батарей',
+      desc: 'Регулировка угла наклона панелей для оптимального сбора энергии',
+      resourceGain: '10%',
+      efficiencyGain: '12%',
+      timeline: '2 недели',
+      impact: 'Среднее влияние',
+    },
+    {
+      id: 3,
+      title: 'Реорганизация области хранения',
+      desc: 'Внедрение вертикальных систем хранения для увеличения емкости',
+      resourceGain: '25%',
+      efficiencyGain: '15%',
+      timeline: '1 месяц',
+      impact: 'Среднее влияние',
+    },
   ]);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
-      <header className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Исследование участка</h1>
-        <div className="space-x-2">
-          <button className="inline-flex items-center px-3 py-1 bg-blue-600 text-white rounded">
-            <PlusIcon className="w-4 h-4 mr-1" /> Новая зона
-          </button>
-          <button className="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded">
-            <ArrowUpTrayIcon className="w-4 h-4 mr-1" /> Экспортировать
-          </button>
-        </div>
-      </header>
+    <div className="p-6 bg-gray-50 min-h-screen space-y-8 text-black">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold mb-4">Анализ участка Луны</h1>
+        {/* Карта Луны */}
+        <LunarMap />
+      </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="relative flex-1 bg-white rounded-lg shadow h-96 overflow-hidden">
-          <div className="absolute inset-0 bg-gray-200" />
-          <div className="absolute top-2 right-2 flex flex-col space-y-2">
-            <button className="bg-white p-1 rounded shadow">
-              <PlusIcon className="w-4 h-4" />
-            </button>
-            <button className="bg-white p-1 rounded shadow">
-              <MinusIcon className="w-4 h-4" />
-            </button>
-          </div>
-          {zones.map((zone) => (
-            <div
-              key={zone.id}
-              className={`absolute border-2 ${zone.color} rounded`}
-              style={{
-                top: zone.top,
-                left: zone.left,
-                width: zone.width,
-                height: zone.height,
-              }}
-            >
-              <span className="absolute -top-5 left-0 bg-white text-xs px-1 rounded shadow">
-                {zone.name}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
-          <h2 className="text-lg font-medium">Координаты</h2>
-          <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {summary.map(s => (
+          <div key={s.id} className="bg-white p-4 rounded-lg shadow flex items-center space-x-3">
+            {s.icon}
             <div>
-              <label className="block text-sm mb-1">Широта</label>
-              <input
-                type="text"
-                value={coords.lat}
-                onChange={(e) => setCoords({ ...coords, lat: e.target.value })}
-                className="w-full border rounded px-3 py-2"
-                placeholder="Например, 14.657"
-              />
-            </div>
-            <div>
-              <label className="block text-sm mb-1">Долгота</label>
-              <input
-                type="text"
-                value={coords.long}
-                onChange={(e) => setCoords({ ...coords, long: e.target.value })}
-                className="w-full border rounded px-3 py-2"
-                placeholder="Например, 34.123"
-              />
+              <p className="text-sm text-gray-500">{s.title}</p>
+              <p className="text-lg font-medium">{s.value}</p>
             </div>
           </div>
-          <div className="flex space-x-2 pt-4">
-            <button className="flex-1 inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded">
-              <MagnifyingGlassIcon className="w-5 h-5 mr-2" /> Анализировать
-            </button>
-            <button className="flex-1 inline-flex items-center justify-center bg-gray-200 text-gray-700 px-4 py-2 rounded">
-              <XMarkIcon className="w-5 h-5 mr-2" /> Сброс
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h3 className="text-lg font-medium flex items-center">
-            <CubeIcon className="w-6 h-6 text-gray-600 mr-2" />
-            Распределение ресурсов
-          </h3>
-          {resources.map((r, i) => (
-            <div key={i} className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span>{r.name}</span>
-                <span>{r.percentage}%</span>
-              </div>
-              <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
-                <div className={`${r.color} h-2`} style={{ width: `${r.percentage}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h3 className="text-lg font-medium flex items-center">
-            <ExclamationTriangleIcon className="w-6 h-6 text-gray-600 mr-2" />
-            Оценка рисков
-          </h3>
-          {risks.map((risk, i) => {
-            const color =
-              risk.level === 'low'
-                ? 'bg-green-500'
-                : risk.level === 'medium'
-                ? 'bg-yellow-500'
-                : 'bg-red-500';
-            return (
-              <div key={i} className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span>{risk.name}</span>
-                  <span className="capitalize">{risk.level}</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
-                  <div className={`${color} h-2`} style={{ width: `${risk.percent}%` }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <div className="bg-white rounded-lg shadow p-6">
-  <h3 className="text-lg font-medium mb-4">История анализов</h3>
-  <div className="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Координаты</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Результат</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
-        </tr>
-      </thead>
-      <tbody>
-        {history.map(entry => (
-          <tr key={entry.id}>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.date}</td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.coords}</td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.summary}</td>
-            <td className="flex space-x-2 px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              <button>
-                <EyeIcon className="w-5 h-5 text-gray-600" />
-              </button>
-              <button>
-                <TrashIcon className="w-5 h-5 text-red-600" />
-              </button>
-            </td>
-          </tr>
         ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-</div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg shadow p-6 space-y-6">
+          <h2 className="text-xl font-medium">Анализ инфраструктуры</h2>
+          <ul className="space-y-6">
+            {sections.map(sec => (
+              <li key={sec.id} className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  {sec.icon}
+                  <p className="font-medium">{sec.title}</p>
+                </div>
+                <ul className="space-y-1 text-sm">
+                  {sec.metrics.map(m => (
+                    <li key={m.label} className="flex justify-between">
+                      <span>{m.label}</span>
+                      <span>{m.value}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex justify-between text-sm">
+                  <span>Общая производительность</span>
+                  <span className="text-green-600">{sec.overall}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6 space-y-6">
+          <h2 className="text-xl font-medium">Использование ресурсов</h2>
+          <ul className="space-y-6">
+            {resources.map(r => (
+              <li key={r.id} className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  {r.icon}
+                  <p className="font-medium">{r.title}</p>
+                </div>
+                <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                  <div className="h-2 bg-green-500" style={{ width: r.current }} />
+                </div>
+                <div className="text-sm flex justify-between">
+                  <span>Целевая эффективность</span>
+                  <span>{r.target}</span>
+                </div>
+                <div className="text-sm flex justify-between">
+                  <span>Эффективность ресурсов</span>
+                  <span>{r.efficiency}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6 space-y-6">
+        <h2 className="text-xl font-medium">Рекомендации по оптимизации</h2>
+        <ul className="space-y-6">
+          {suggestions.map(su => (
+            <li key={su.id} className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <LightBulbIcon className="w-6 h-6 text-yellow-500" />
+                  <p className="font-medium">{su.title}</p>
+                </div>
+                <span className="text-sm text-gray-500">{su.impact}</span>
+              </div>
+              <p className="text-sm text-gray-600">{su.desc}</p>
+              <div className="flex space-x-4 text-sm">
+                <div className="flex-1">
+                  <p>Экономия ресурсов</p>
+                  <p className="font-medium">{su.resourceGain}</p>
+                </div>
+                <div className="flex-1">
+                  <p>Повышение эффективности</p>
+                  <p className="font-medium">{su.efficiencyGain}</p>
+                </div>
+                <div>
+                  <p>Реализация</p>
+                  <p className="font-medium">{su.timeline}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <button className="inline-flex items-center text-blue-600 text-sm">
+                  <ArrowPathIcon className="w-4 h-4 mr-1" />
+                  Подробнее
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
