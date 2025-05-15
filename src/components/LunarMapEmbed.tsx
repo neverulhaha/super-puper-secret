@@ -8,7 +8,7 @@ interface Props {
   onSelectCoords?: (lat: number, lon: number) => void;
 }
 
-const MOON_TEXTURE_URL = '/moon_1024.jpg';
+const MOON_TEXTURE_URL = '/moon_8k_color_brim16.jpg';
 
 export default function LunarMapEmbed({ onSelectCoords }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
