@@ -15,7 +15,6 @@ import {
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 
-// Ленивая подгрузка карты для поддержки SSR в Next.js
 const LunarMap = dynamic(() => import('@/components/LunarMap'), { ssr: false });
 
 interface Summary {

@@ -7,7 +7,7 @@ const mapStyle = {
   width: '100%',
   borderRadius: '1.5rem',
   marginBottom: '1.5rem',
-  boxShadow: '0 0 24px 0 rgba(0,0,0,0.1)'
+  boxShadow: '0 0 24px 0 rgba(0,0,0,0.1)',
 };
 
 export default function LunarMap() {
@@ -19,10 +19,9 @@ export default function LunarMap() {
       maxZoom={7}
       style={mapStyle}
       scrollWheelZoom={true}
-      crs={undefined}
     >
       <WMSTileLayer
-        url="http://luna.iaaras.ru/lunaserv/wms"
+        url="https://luna.iaaras.ru/lunaserv/wms"
         layers="Lunar_LRO_LOLA_DEM_118m"
         format="image/png"
         transparent={true}
