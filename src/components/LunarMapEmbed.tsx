@@ -41,6 +41,9 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
     light.position.set(5, 3, 5);
     scene.add(light);
 
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1); 
+    scene.add(ambientLight);
+
     const loader = new THREE.TextureLoader();
     loader.load(MOON_TEXTURE_URL, (texture) => {
       const geometry = new THREE.SphereGeometry(1, 64, 64);
