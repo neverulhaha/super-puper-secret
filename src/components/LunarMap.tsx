@@ -20,9 +20,12 @@ export default function LunarMap() {
       scrollWheelZoom={true}
     >
       <TileLayer
-        attribution="CartoDB"
-        url="https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
-      />
+  attribution="NASA MoonTrek"
+  url="https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0//default/default028mm/{z}/{x}/{y}.jpg"
+  maxZoom={7}
+  minZoom={0}
+/>
+
     </MapContainer>
   );
 }
