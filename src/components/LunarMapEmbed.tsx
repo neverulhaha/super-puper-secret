@@ -28,14 +28,24 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
 
     const width = containerRef.current.offsetWidth;
     const height = containerRef.current.offsetHeight;
+    const initialCameraZ = 3;
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    camera.position.z = 3;
+    camera.position.z = initialCameraZ;
     cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
+
+    const starTexture = new THREE.TextureLoader().load('/stars.jpg');
+    const starGeometry = new THREE.SphereGeometry(100, 64, 64);
+    const starMaterial = new THREE.MeshBasicMaterial({
+      map: starTexture,
+      side: THREE.BackSide
+    });
+    const starSphere = new THREE.Mesh(starGeometry, starMaterial);
+    scene.add(starSphere);
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(5, 3, 5);
@@ -56,6 +66,10 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
+
+    controls.minDistance = initialCameraZ;
+    controls.maxDistance = 10;
+
     controlsRef.current = controls;
 
     const handleClick = (event: MouseEvent) => {
