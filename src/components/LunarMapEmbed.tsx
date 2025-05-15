@@ -8,15 +8,19 @@ interface Props {
   onSelectCoords?: (lat: number, lon: number) => void;
 }
 
-const MOON_TEXTURE_URL = '/moon_8k_color_brim16.jpg';
+const MOON_TEXTURE_URL = '/moon.jpg';
 
 export default function LunarMapEmbed({ onSelectCoords }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const scene = new THREE.Scene();
+
     const camera = new THREE.PerspectiveCamera(
       50,
       containerRef.current.offsetWidth / containerRef.current.offsetHeight,
@@ -24,25 +28,27 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
       1000
     );
     camera.position.z = 3;
+    cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(containerRef.current.offsetWidth, containerRef.current.offsetHeight);
     containerRef.current.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 3, 5);
+    scene.add(light);
 
     const loader = new THREE.TextureLoader();
+    let moon: THREE.Mesh;
     loader.load(MOON_TEXTURE_URL, (texture) => {
       const geometry = new THREE.SphereGeometry(1, 64, 64);
       const material = new THREE.MeshPhongMaterial({ map: texture });
-      const moon = new THREE.Mesh(geometry, material);
+      moon = new THREE.Mesh(geometry, material);
       scene.add(moon);
 
-      const light = new THREE.DirectionalLight(0xffffff, 1);
-      light.position.set(5, 3, 5);
-      scene.add(light);
-
-      const controls = new OrbitControls(camera, renderer.domElement);
-
       renderer.domElement.addEventListener('click', (event) => {
+        if (!moon) return;
         const rect = renderer.domElement.getBoundingClientRect();
         const mouse = new THREE.Vector2(
           ((event.clientX - rect.left) / rect.width) * 2 - 1,
@@ -61,23 +67,36 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
           }
         }
       });
-
-      const animate = () => {
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-      };
-      animate();
-
-      return () => {
-        renderer.dispose();
-        controls.dispose();
-        containerRef.current?.removeChild(renderer.domElement);
-      };
     });
 
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controlsRef.current = controls;
+
+    const handleResize = () => {
+      if (!containerRef.current || !rendererRef.current || !cameraRef.current) return;
+      const width = containerRef.current.offsetWidth;
+      const height = containerRef.current.offsetHeight;
+      rendererRef.current.setSize(width, height);
+      cameraRef.current.aspect = width / height;
+      cameraRef.current.updateProjectionMatrix();
+    };
+    window.addEventListener('resize', handleResize);
+
+    const animate = () => {
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    };
+    animate();
+
     return () => {
-      while (containerRef.current?.firstChild) {
-        containerRef.current.removeChild(containerRef.current.firstChild);
+      window.removeEventListener('resize', handleResize);
+      controls.dispose();
+      renderer.dispose();
+      if (containerRef.current && renderer.domElement.parentElement === containerRef.current) {
+        containerRef.current.removeChild(renderer.domElement);
       }
     };
   }, [onSelectCoords]);
