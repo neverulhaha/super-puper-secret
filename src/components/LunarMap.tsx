@@ -1,5 +1,4 @@
-// src/components/LunarMap.tsx
-import { MapContainer, WMSTileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const mapStyle = {
@@ -20,13 +19,9 @@ export default function LunarMap() {
       style={mapStyle}
       scrollWheelZoom={true}
     >
-      <WMSTileLayer
-        url="https://luna.iaaras.ru/lunaserv/wms"
-        layers="Lunar_LRO_LOLA_DEM_118m"
-        format="image/png"
-        transparent={true}
-        version="1.1.1"
-        attribution="IAARAS LunaServ"
+      <TileLayer
+        attribution="CartoDB"
+        url="https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
       />
     </MapContainer>
   );
