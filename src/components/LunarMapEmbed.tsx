@@ -11,6 +11,7 @@ interface Props {
 const MOON_TEXTURE_URL = '/moon_8k_color_brim16.jpg';
 
 export default function LunarMapEmbed({ onSelectCoords }: Props) {
+  console.log('LunarMapEmbed mounted');
   const containerRef = useRef<HTMLDivElement>(null);
 
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -105,7 +106,7 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
         containerRef.current.removeChild(renderer.domElement);
       }
     };
-  }, [onSelectCoords]);
+  }, []);
 
   return <div ref={containerRef} style={{ width: '100%', height: '500px', minHeight: 300 }} />;
 }

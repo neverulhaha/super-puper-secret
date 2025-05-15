@@ -1,6 +1,6 @@
 'use client';
 import dynamic from "next/dynamic";
-import React, { useState } from 'react';
+import React, { useState,useCallback } from 'react';
 import {
   PlusIcon,
   ArrowUpTrayIcon,
@@ -47,6 +47,10 @@ export default function AnalysisPage() {
   ]);
 
   const [coords, setCoords] = useState({ lat: '', long: '' });
+  const handleSelectCoords = useCallback(
+    (lat: number, lon: number) => setCoords({ lat: lat.toFixed(3), long: lon.toFixed(3) }),
+    []
+  );
   const [resources] = useState<ResourceDistribution[]>([
     { name: 'Гелий-3', percentage: 12.3, color: 'bg-blue-500' },
     { name: 'Титан', percentage: 25.8, color: 'bg-green-500' },
@@ -90,7 +94,7 @@ export default function AnalysisPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:flex-1 bg-white rounded-lg shadow overflow-hidden flex items-stretch">
           <LunarMap
-            onSelectCoords={(lat: number, lon: number) => setCoords({ lat: lat.toFixed(3), long: lon.toFixed(3) })}
+            onSelectCoords={handleSelectCoords}
           />
         </div>
         <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
