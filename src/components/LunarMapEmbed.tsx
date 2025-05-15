@@ -47,11 +47,11 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
     const starSphere = new THREE.Mesh(starGeometry, starMaterial);
     scene.add(starSphere);
 
-const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+const sunLight = new THREE.DirectionalLight(0xffffff, 0.3);
 sunLight.position.set(5, 3, 10);
 scene.add(sunLight);
 
-const ambientLight = new THREE.AmbientLight(0x223366, 0.4);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 scene.add(ambientLight);
 
 const earthshine = new THREE.DirectionalLight(0x4477aa, 0.09);
