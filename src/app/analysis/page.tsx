@@ -1,7 +1,5 @@
 'use client';
 import dynamic from "next/dynamic";
-const LunarMap = dynamic(() => import('@/components/LunarMapEmbed'), { ssr: false });
-
 import React, { useState } from 'react';
 import {
   PlusIcon,
@@ -13,6 +11,8 @@ import {
   EyeIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
+
+const LunarMap = dynamic(() => import('@/components/LunarMapEmbed'), { ssr: false });
 
 type Zone = {
   id: number;
@@ -63,6 +63,16 @@ export default function AnalysisPage() {
     { id: 3, date: '2025-05-08', coords: '14.123°, 34.456°', summary: 'Высокая опасность' },
   ]);
 
+  const handleReset = () => setCoords({ lat: '', long: '' });
+
+  const handleAnalyze = () => {
+    if (!coords.lat || !coords.long) {
+      alert("Выберите координаты на Луне или заполните поля вручную.");
+      return;
+    }
+    alert(`Запуск анализа участка (${coords.lat}, ${coords.long})`);
+  };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
       <header className="flex justify-between items-center">
@@ -79,7 +89,9 @@ export default function AnalysisPage() {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:flex-1 bg-white rounded-lg shadow overflow-hidden flex items-stretch">
-          <LunarMap />
+          <LunarMap
+            onSelectCoords={(lat: number, lon: number) => setCoords({ lat: lat.toFixed(3), long: lon.toFixed(3) })}
+          />
         </div>
         <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-medium">Координаты</h2>
@@ -106,10 +118,16 @@ export default function AnalysisPage() {
             </div>
           </div>
           <div className="flex space-x-2 pt-4">
-            <button className="flex-1 inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded">
+            <button
+              className="flex-1 inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded"
+              onClick={handleAnalyze}
+            >
               <MagnifyingGlassIcon className="w-5 h-5 mr-2" /> Анализировать
             </button>
-            <button className="flex-1 inline-flex items-center justify-center bg-gray-200 text-gray-700 px-4 py-2 rounded">
+            <button
+              className="flex-1 inline-flex items-center justify-center bg-gray-200 text-gray-700 px-4 py-2 rounded"
+              onClick={handleReset}
+            >
               <XMarkIcon className="w-5 h-5 mr-2" /> Сброс
             </button>
           </div>
