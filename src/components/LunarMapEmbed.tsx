@@ -28,9 +28,9 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
 
     const width = containerRef.current.offsetWidth;
     const height = containerRef.current.offsetHeight;
-    const initialCameraZ = 0;
+    const initialCameraZ = 3;
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    camera.position.z = initialCameraZ;
+    camera.position.z = 3;
     cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -67,7 +67,7 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
 
-    controls.minDistance = initialCameraZ;
+    controls.minDistance = 1;
     controls.maxDistance = 5;
 
     controlsRef.current = controls;
