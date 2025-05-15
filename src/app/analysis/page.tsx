@@ -1,17 +1,13 @@
 'use client';
 import dynamic from "next/dynamic";
-
-// Динамический импорт, чтобы избежать ReferenceError: window is not defined
-const LunarMap = dynamic(() => import('@/components/LunarMap'), { ssr: false });
+const LunarMap = dynamic(() => import('@/components/LunarMapEmbed'), { ssr: false });
 
 import React, { useState } from 'react';
 import {
   PlusIcon,
-  MinusIcon,
   ArrowUpTrayIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
-  ChartBarIcon,
   CubeIcon,
   ExclamationTriangleIcon,
   EyeIcon,
@@ -22,10 +18,6 @@ type Zone = {
   id: number;
   name: string;
   color: string;
-  top: string;
-  left: string;
-  width: string;
-  height: string;
 };
 
 type ResourceDistribution = {
@@ -49,9 +41,9 @@ type HistoryEntry = {
 
 export default function AnalysisPage() {
   const [zones] = useState<Zone[]>([
-    { id: 1, name: 'Зона A', color: 'border-blue-400', top: '10%', left: '10%', width: '30%', height: '25%' },
-    { id: 2, name: 'Зона B', color: 'border-green-400', top: '50%', left: '20%', width: '25%', height: '30%' },
-    { id: 3, name: 'Зона C', color: 'border-purple-400', top: '30%', left: '60%', width: '30%', height: '20%' },
+    { id: 1, name: 'Зона A', color: 'border-blue-400' },
+    { id: 2, name: 'Зона B', color: 'border-green-400' },
+    { id: 3, name: 'Зона C', color: 'border-purple-400' },
   ]);
 
   const [coords, setCoords] = useState({ lat: '', long: '' });
@@ -86,35 +78,11 @@ export default function AnalysisPage() {
       </header>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="relative flex-1 bg-white rounded-lg shadow overflow-hidden h-96 flex items-stretch">
-  <LunarMap />
-  
-  <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
-    <button className="bg-white p-1 rounded shadow">
-      <PlusIcon className="w-4 h-4" />
-    </button>
-    <button className="bg-white p-1 rounded shadow">
-      <MinusIcon className="w-4 h-4" />
-    </button>
-  </div>
-    {zones.map((zone) => (
-    <div
-      key={zone.id}
-      className={`absolute border-2 ${zone.color} rounded z-10`}
-      style={{
-        top: zone.top,
-        left: zone.left,
-        width: zone.width,
-        height: zone.height,
-      }}
-    >
-      <span className="absolute -top-5 left-0 bg-white text-xs px-1 rounded shadow">
-        {zone.name}
-      </span>
-    </div>
-  ))}
-</div>
-
+        {/* Карта (iframe) */}
+        <div className="w-full lg:flex-1 bg-white rounded-lg shadow overflow-hidden flex items-stretch">
+          <LunarMap />
+        </div>
+        {/* Боковая панель */}
         <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-medium">Координаты</h2>
           <div className="space-y-3">
@@ -149,6 +117,22 @@ export default function AnalysisPage() {
           </div>
         </div>
       </div>
+
+      {/* Зоны интереса — отдельный блок */}
+      <div className="mt-4">
+        <h3 className="text-lg font-medium mb-2">Зоны интереса</h3>
+        <div className="flex flex-wrap gap-2">
+          {zones.map((zone) => (
+            <div
+              key={zone.id}
+              className={`px-3 py-1 rounded border-2 ${zone.color} bg-white shadow text-sm`}
+            >
+              {zone.name}
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h3 className="text-lg font-medium flex items-center">
