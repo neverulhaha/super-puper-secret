@@ -1,5 +1,7 @@
 'use client';
+
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import {
   ArrowTrendingUpIcon,
   ClockIcon,
@@ -12,6 +14,9 @@ import {
   LightBulbIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline';
+
+// Ленивая подгрузка карты для поддержки SSR в Next.js
+const LunarMap = dynamic(() => import('@/components/LunarMap'), { ssr: false });
 
 interface Summary {
   id: number;
@@ -53,7 +58,7 @@ interface Suggestion {
   impact: 'Сильное влияние' | 'Среднее влияние';
 }
 
-export default function AnalyticsPage() {
+export default function AnalysisPage() {
   const [summary] = useState<Summary[]>([
     { id: 1, title: 'Общая эффективность', value: '94.5%', icon: <ArrowTrendingUpIcon className="w-6 h-6 text-green-500" /> },
     { id: 2, title: 'Время безотказной работы', value: '99.9%', icon: <ClockIcon className="w-6 h-6 text-blue-500" /> },
@@ -151,6 +156,12 @@ export default function AnalyticsPage() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-8 text-black">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold mb-4">Анализ участка Луны</h1>
+        {/* Карта Луны */}
+        <LunarMap />
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {summary.map(s => (
           <div key={s.id} className="bg-white p-4 rounded-lg shadow flex items-center space-x-3">
