@@ -1,5 +1,17 @@
-import { MapContainer, TileLayer } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+"use client";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { useEffect } from "react";
+
+function MapFixer() {
+  const map = useMap();
+  useEffect(() => {
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 500);
+  }, [map]);
+  return null;
+}
 
 export default function LunarMap() {
   return (
@@ -20,6 +32,7 @@ export default function LunarMap() {
         minZoom={0}
         noWrap={true}
       />
+      <MapFixer />
     </MapContainer>
   );
 }
