@@ -1,5 +1,8 @@
 'use client';
-import LunarMap from '@/components/LunarMap';
+import dynamic from "next/dynamic";
+
+// Динамический импорт, чтобы избежать ReferenceError: window is not defined
+const LunarMap = dynamic(() => import('@/components/LunarMap'), { ssr: false });
 
 import React, { useState } from 'react';
 import {
@@ -84,34 +87,34 @@ export default function AnalysisPage() {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="relative flex-1 bg-white rounded-lg shadow overflow-hidden h-96">
-  <div className="absolute inset-0">
-    <LunarMap />
-  </div>
-  <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
-    <button className="bg-white p-1 rounded shadow">
-      <PlusIcon className="w-4 h-4" />
-    </button>
-    <button className="bg-white p-1 rounded shadow">
-      <MinusIcon className="w-4 h-4" />
-    </button>
-  </div>
-  {zones.map((zone) => (
-    <div
-      key={zone.id}
-      className={`absolute border-2 ${zone.color} rounded z-10`}
-      style={{
-        top: zone.top,
-        left: zone.left,
-        width: zone.width,
-        height: zone.height,
-      }}
-    >
-      <span className="absolute -top-5 left-0 bg-white text-xs px-1 rounded shadow">
-        {zone.name}
-      </span>
-    </div>
-  ))}
-</div>
+          <div className="absolute inset-0">
+            <LunarMap />
+          </div>
+          <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
+            <button className="bg-white p-1 rounded shadow">
+              <PlusIcon className="w-4 h-4" />
+            </button>
+            <button className="bg-white p-1 rounded shadow">
+              <MinusIcon className="w-4 h-4" />
+            </button>
+          </div>
+          {zones.map((zone) => (
+            <div
+              key={zone.id}
+              className={`absolute border-2 ${zone.color} rounded z-10`}
+              style={{
+                top: zone.top,
+                left: zone.left,
+                width: zone.width,
+                height: zone.height,
+              }}
+            >
+              <span className="absolute -top-5 left-0 bg-white text-xs px-1 rounded shadow">
+                {zone.name}
+              </span>
+            </div>
+          ))}
+        </div>
         <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-medium">Координаты</h2>
           <div className="space-y-3">
@@ -191,37 +194,37 @@ export default function AnalysisPage() {
         </div>
       </div>
       <div className="bg-white rounded-lg shadow p-6">
-  <h3 className="text-lg font-medium mb-4">История анализов</h3>
-  <div className="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Координаты</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Результат</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
-        </tr>
-      </thead>
-      <tbody>
-        {history.map(entry => (
-          <tr key={entry.id}>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.date}</td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.coords}</td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.summary}</td>
-            <td className="flex space-x-2 px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              <button>
-                <EyeIcon className="w-5 h-5 text-gray-600" />
-              </button>
-              <button>
-                <TrashIcon className="w-5 h-5 text-red-600" />
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-</div>
+        <h3 className="text-lg font-medium mb-4">История анализов</h3>
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Координаты</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Результат</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map(entry => (
+                <tr key={entry.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.coords}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.summary}</td>
+                  <td className="flex space-x-2 px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <button>
+                      <EyeIcon className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <button>
+                      <TrashIcon className="w-5 h-5 text-red-600" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }
