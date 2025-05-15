@@ -47,16 +47,16 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
     const starSphere = new THREE.Mesh(starGeometry, starMaterial);
     scene.add(starSphere);
 
-const sunLight = new THREE.DirectionalLight(0xffffff, 1.7);
-sunLight.position.set(3, 5, 10);
+const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+sunLight.position.set(5, 3, 10);
 scene.add(sunLight);
 
-const ambientLight = new THREE.AmbientLight(0x222244, 0.18); 
+const ambientLight = new THREE.AmbientLight(0x223366, 0.4);
 scene.add(ambientLight);
 
-const backLight = new THREE.DirectionalLight(0x444466, 0.08);
-backLight.position.set(-4, -2, -8);
-scene.add(backLight);
+const earthshine = new THREE.DirectionalLight(0x4477aa, 0.09);
+earthshine.position.set(-7, -2, -9);
+scene.add(earthshine);
 
     const loader = new THREE.TextureLoader();
     loader.load(MOON_TEXTURE_URL, (texture) => {
@@ -71,7 +71,7 @@ scene.add(backLight);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
 
-    controls.minDistance = 1.5;
+    controls.minDistance = 1.2;
     controls.maxDistance = 3;
 
     controlsRef.current = controls;
