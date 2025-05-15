@@ -1,38 +1,25 @@
 "use client";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import { useEffect } from "react";
 
-function MapFixer() {
-  const map = useMap();
-  useEffect(() => {
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 500);
-  }, [map]);
-  return null;
-}
+import React from "react";
 
 export default function LunarMap() {
   return (
-    <MapContainer
-      center={[0, 0]}
-      zoom={2}
-      minZoom={0}
-      maxZoom={7}
-      scrollWheelZoom={true}
-      worldCopyJump={false}
-      maxBounds={[[90, -180], [-90, 180]]}
-      className="w-full h-full rounded-2xl"
-    >
-      <TileLayer
-        attribution="NASA MoonTrek"
-        url="https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0//default/default028mm/{z}/{x}/{y}.jpg"
-        maxZoom={7}
-        minZoom={0}
-        noWrap={true}
+    <div className="w-full h-[350px] rounded-2xl overflow-hidden shadow mb-6">
+      <iframe
+        src="https://quickmap.lroc.asu.edu/?extent=-90,-180,90,180&proj=eq&layers=NrLROCKaguya%2Clroc_bw&camera=eq"
+        title="LROC QuickMap"
+        width="100%"
+        height="100%"
+        style={{
+          border: 0,
+          width: "100%",
+          height: "100%",
+          minHeight: 350,
+          borderRadius: "1.5rem",
+        }}
+        allowFullScreen
+        loading="lazy"
       />
-      <MapFixer />
-    </MapContainer>
+    </div>
   );
 }
