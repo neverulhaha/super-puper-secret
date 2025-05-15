@@ -78,11 +78,9 @@ export default function AnalysisPage() {
       </header>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Карта (iframe) */}
         <div className="w-full lg:flex-1 bg-white rounded-lg shadow overflow-hidden flex items-stretch">
           <LunarMap />
         </div>
-        {/* Боковая панель */}
         <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-medium">Координаты</h2>
           <div className="space-y-3">
@@ -118,7 +116,6 @@ export default function AnalysisPage() {
         </div>
       </div>
 
-      {/* Зоны интереса — отдельный блок */}
       <div className="mt-4">
         <h3 className="text-lg font-medium mb-2">Зоны интереса</h3>
         <div className="flex flex-wrap gap-2">
