@@ -1,16 +1,18 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { cookies } from 'next/headers';
+import { NextResponse } from 'next/server';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 
 export async function POST(req: Request) {
+  const supabase = createRouteHandlerClient({ cookies });
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+
   try {
     const entries = await req.json();
     const normalized = (Array.isArray(entries) ? entries : [entries])
       .map((item) => ({
+        user_id: user.id,
         lat: String(item.lat ?? item.latitude ?? ''),
         lon: String(item.lon ?? item.longitude ?? ''),
         summary: String(item.summary ?? 'Импортировано'),
@@ -37,6 +39,7 @@ export async function POST(req: Request) {
     const { data: fullHistory, error: err2 } = await supabase
       .from('lunar_analysis')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (err2) return NextResponse.json({ error: err2.message }, { status: 500 });
