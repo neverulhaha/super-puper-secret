@@ -1,15 +1,9 @@
 'use client';
 import dynamic from "next/dynamic";
-import React, { useState,useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
-  PlusIcon,
-  ArrowUpTrayIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-  CubeIcon,
-  ExclamationTriangleIcon,
-  EyeIcon,
-  TrashIcon,
+  PlusIcon, ArrowUpTrayIcon, MagnifyingGlassIcon, XMarkIcon, CubeIcon,
+  ExclamationTriangleIcon, EyeIcon, TrashIcon,
 } from '@heroicons/react/24/outline';
 
 const LunarMap = dynamic(() => import('@/components/LunarMapEmbed'), { ssr: false });
@@ -19,24 +13,21 @@ type Zone = {
   name: string;
   color: string;
 };
-
-type ResourceDistribution = {
-  name: string;
-  percentage: number;
-  color: string;
-};
-
-type RiskItem = {
-  name: string;
-  level: 'low' | 'medium' | 'high';
-  percent: number;
-};
+type ResourceDistribution = { name: string; percentage: number; color: string; };
+type RiskItem = { name: string; level: 'low' | 'medium' | 'high'; percent: number; };
 
 type HistoryEntry = {
   id: number;
-  date: string;
-  coords: string;
+  created_at: string;
+  lat: string;
+  lon: string;
   summary: string;
+  helium3: number;
+  titanium: number;
+  silicon: number;
+  craters: number;
+  slopes: number;
+  radioactivity: number;
 };
 
 export default function AnalysisPage() {
@@ -51,31 +42,39 @@ export default function AnalysisPage() {
     (lat: number, lon: number) => setCoords({ lat: lat.toFixed(3), long: lon.toFixed(3) }),
     []
   );
-  const [resources] = useState<ResourceDistribution[]>([
-    { name: 'Гелий-3', percentage: 12.3, color: 'bg-blue-500' },
-    { name: 'Титан', percentage: 25.8, color: 'bg-green-500' },
-    { name: 'Кремний', percentage: 61.9, color: 'bg-yellow-500' },
-  ]);
-  const [risks] = useState<RiskItem[]>([
-    { name: 'Кратеры', level: 'medium', percent: 45 },
-    { name: 'Склоны > 30°', level: 'high', percent: 75 },
-    { name: 'Радиоактивность', level: 'low', percent: 15 },
-  ]);
-  const [history] = useState<HistoryEntry[]>([
-    { id: 1, date: '2025-05-12', coords: '14.657°, 34.123°', summary: 'Низкая опасность' },
-    { id: 2, date: '2025-05-10', coords: '15.002°, 33.987°', summary: 'Средняя опасность' },
-    { id: 3, date: '2025-05-08', coords: '14.123°, 34.456°', summary: 'Высокая опасность' },
-  ]);
 
-  const handleReset = () => setCoords({ lat: '', long: '' });
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleAnalyze = () => {
+  useEffect(() => {
+    async function fetchHistory() {
+      setLoading(true);
+      const res = await fetch('/api/analysis');
+      const data = await res.json();
+      setHistory(data);
+      setLoading(false);
+    }
+    fetchHistory();
+  }, []);
+
+  const handleAnalyze = async () => {
     if (!coords.lat || !coords.long) {
       alert("Выберите координаты на Луне или заполните поля вручную.");
       return;
     }
-    alert(`Запуск анализа участка (${coords.lat}, ${coords.long})`);
+    setLoading(true);
+    const res = await fetch('/api/analysis', {
+      method: 'POST',
+      body: JSON.stringify({ lat: coords.lat, lon: coords.long }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const entry = await res.json();
+    setHistory(prev => [entry, ...prev]);
+    setLoading(false);
+    setCoords({ lat: '', long: '' });
   };
+
+  const handleReset = () => setCoords({ lat: '', long: '' });
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
@@ -93,9 +92,7 @@ export default function AnalysisPage() {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:flex-1 bg-white rounded-lg shadow overflow-hidden flex items-stretch">
-          <LunarMap
-            onSelectCoords={handleSelectCoords}
-          />
+          <LunarMap onSelectCoords={handleSelectCoords} />
         </div>
         <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-medium">Координаты</h2>
@@ -125,12 +122,14 @@ export default function AnalysisPage() {
             <button
               className="flex-1 inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded"
               onClick={handleAnalyze}
+              disabled={loading}
             >
-              <MagnifyingGlassIcon className="w-5 h-5 mr-2" /> Анализировать
+              <MagnifyingGlassIcon className="w-5 h-5 mr-2" /> {loading ? "Анализ..." : "Анализировать"}
             </button>
             <button
               className="flex-1 inline-flex items-center justify-center bg-gray-200 text-gray-700 px-4 py-2 rounded"
               onClick={handleReset}
+              disabled={loading}
             >
               <XMarkIcon className="w-5 h-5 mr-2" /> Сброс
             </button>
@@ -152,69 +151,37 @@ export default function AnalysisPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h3 className="text-lg font-medium flex items-center">
-            <CubeIcon className="w-6 h-6 text-gray-600 mr-2" />
-            Распределение ресурсов
-          </h3>
-          {resources.map((r, i) => (
-            <div key={i} className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span>{r.name}</span>
-                <span>{r.percentage}%</span>
-              </div>
-              <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
-                <div className={`${r.color} h-2`} style={{ width: `${r.percentage}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h3 className="text-lg font-medium flex items-center">
-            <ExclamationTriangleIcon className="w-6 h-6 text-gray-600 mr-2" />
-            Оценка рисков
-          </h3>
-          {risks.map((risk, i) => {
-            const color =
-              risk.level === 'low'
-                ? 'bg-green-500'
-                : risk.level === 'medium'
-                ? 'bg-yellow-500'
-                : 'bg-red-500';
-            return (
-              <div key={i} className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span>{risk.name}</span>
-                  <span className="capitalize">{risk.level}</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
-                  <div className={`${color} h-2`} style={{ width: `${risk.percent}%` }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium mb-4">История анализов</h3>
-        <div className="table-container">
+        <div className="table-container overflow-x-auto">
           <table>
             <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Координаты</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Результат</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Координаты</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Результат</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ресурсы</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Риски</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
               </tr>
             </thead>
             <tbody>
               {history.map(entry => (
                 <tr key={entry.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.coords}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.summary}</td>
-                  <td className="flex space-x-2 px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{entry.created_at?.slice(0, 10)}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{entry.lat}°, {entry.lon}°</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{entry.summary}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-800">
+                    <div>Гелий-3: {entry.helium3}%</div>
+                    <div>Титан: {entry.titanium}%</div>
+                    <div>Кремний: {entry.silicon}%</div>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-800">
+                    <div>Кратеры: {entry.craters}%</div>
+                    <div>Склоны: {entry.slopes}%</div>
+                    <div>Радиоактивность: {entry.radioactivity}%</div>
+                  </td>
+                  <td className="flex space-x-2 px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                     <button>
                       <EyeIcon className="w-5 h-5 text-gray-600" />
                     </button>
