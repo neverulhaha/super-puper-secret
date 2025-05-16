@@ -2,19 +2,11 @@
 import dynamic from "next/dynamic";
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  PlusIcon, ArrowUpTrayIcon, MagnifyingGlassIcon, XMarkIcon, CubeIcon,
+  ArrowUpTrayIcon, MagnifyingGlassIcon, XMarkIcon, CubeIcon,
   ExclamationTriangleIcon, EyeIcon, TrashIcon,
 } from '@heroicons/react/24/outline';
 
 const LunarMap = dynamic(() => import('@/components/LunarMapEmbed'), { ssr: false });
-
-type Zone = {
-  id: number;
-  name: string;
-  color: string;
-};
-type ResourceDistribution = { name: string; percentage: number; color: string; };
-type RiskItem = { name: string; level: 'low' | 'medium' | 'high'; percent: number; };
 
 type HistoryEntry = {
   id: number;
@@ -31,12 +23,6 @@ type HistoryEntry = {
 };
 
 export default function AnalysisPage() {
-  const [zones] = useState<Zone[]>([
-    { id: 1, name: 'Зона A', color: 'border-blue-400' },
-    { id: 2, name: 'Зона B', color: 'border-green-400' },
-    { id: 3, name: 'Зона C', color: 'border-purple-400' },
-  ]);
-
   const [coords, setCoords] = useState({ lat: '', long: '' });
   const handleSelectCoords = useCallback(
     (lat: number, lon: number) => setCoords({ lat: lat.toFixed(3), long: lon.toFixed(3) }),
@@ -45,6 +31,8 @@ export default function AnalysisPage() {
 
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [selected, setSelected] = useState<HistoryEntry | null>(null);
 
   useEffect(() => {
     async function fetchHistory() {
@@ -76,18 +64,21 @@ export default function AnalysisPage() {
 
   const handleReset = () => setCoords({ lat: '', long: '' });
 
+  const handleDelete = async (id: number) => {
+    setLoading(true);
+    await fetch(`/api/analysis/${id}`, { method: 'DELETE' });
+    setHistory(prev => prev.filter(entry => entry.id !== id));
+    setLoading(false);
+    if (selected && selected.id === id) setSelected(null);
+  };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
       <header className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Исследование участка</h1>
-        <div className="space-x-2">
-          <button className="inline-flex items-center px-3 py-1 bg-blue-600 text-white rounded">
-            <PlusIcon className="w-4 h-4 mr-1" /> Новая зона
-          </button>
-          <button className="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded">
-            <ArrowUpTrayIcon className="w-4 h-4 mr-1" /> Экспортировать
-          </button>
-        </div>
+        <button className="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded">
+          <ArrowUpTrayIcon className="w-4 h-4 mr-1" /> Экспортировать
+        </button>
       </header>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -137,20 +128,6 @@ export default function AnalysisPage() {
         </div>
       </div>
 
-      <div className="mt-4">
-        <h3 className="text-lg font-medium mb-2">Зоны интереса</h3>
-        <div className="flex flex-wrap gap-2">
-          {zones.map((zone) => (
-            <div
-              key={zone.id}
-              className={`px-3 py-1 rounded border-2 ${zone.color} bg-white shadow text-sm`}
-            >
-              {zone.name}
-            </div>
-          ))}
-        </div>
-      </div>
-
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium mb-4">История анализов</h3>
         <div className="table-container overflow-x-auto">
@@ -182,10 +159,10 @@ export default function AnalysisPage() {
                     <div>Радиоактивность: {entry.radioactivity}%</div>
                   </td>
                   <td className="flex space-x-2 px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                    <button>
+                    <button onClick={() => setSelected(entry)}>
                       <EyeIcon className="w-5 h-5 text-gray-600" />
                     </button>
-                    <button>
+                    <button onClick={() => handleDelete(entry.id)}>
                       <TrashIcon className="w-5 h-5 text-red-600" />
                     </button>
                   </td>
@@ -195,6 +172,29 @@ export default function AnalysisPage() {
           </table>
         </div>
       </div>
+      {selected && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setSelected(null)}>
+          <div className="bg-white rounded-lg p-8 min-w-[340px] max-w-[95vw]" onClick={e => e.stopPropagation()}>
+            <h2 className="text-lg font-bold mb-2">Детали анализа</h2>
+            <div className="mb-2 text-gray-700">Дата: <b>{selected.created_at?.slice(0, 16).replace('T', ' ')}</b></div>
+            <div className="mb-2">Координаты: <b>{selected.lat}°, {selected.lon}°</b></div>
+            <div className="mb-2">Результат: <b>{selected.summary}</b></div>
+            <div className="mb-2">
+              <div className="font-semibold mb-1">Ресурсы:</div>
+              <div>Гелий-3: <b>{selected.helium3}%</b></div>
+              <div>Титан: <b>{selected.titanium}%</b></div>
+              <div>Кремний: <b>{selected.silicon}%</b></div>
+            </div>
+            <div className="mb-2">
+              <div className="font-semibold mb-1">Риски:</div>
+              <div>Кратеры: <b>{selected.craters}%</b></div>
+              <div>Склоны: <b>{selected.slopes}%</b></div>
+              <div>Радиоактивность: <b>{selected.radioactivity}%</b></div>
+            </div>
+            <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded" onClick={() => setSelected(null)}>Закрыть</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
