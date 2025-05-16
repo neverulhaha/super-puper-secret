@@ -1,9 +1,9 @@
 'use client';
 import dynamic from "next/dynamic";
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
-  ArrowUpTrayIcon, MagnifyingGlassIcon, XMarkIcon, CubeIcon,
-  ExclamationTriangleIcon, EyeIcon, TrashIcon,
+  ArrowUpTrayIcon, MagnifyingGlassIcon, XMarkIcon,
+  EyeIcon, TrashIcon,
 } from '@heroicons/react/24/outline';
 
 const LunarMap = dynamic(() => import('@/components/LunarMapEmbed'), { ssr: false });
@@ -31,8 +31,10 @@ export default function AnalysisPage() {
 
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
-
   const [selected, setSelected] = useState<HistoryEntry | null>(null);
+
+  const importFileRef = useRef<HTMLInputElement>(null);
+  const importFileSingleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function fetchHistory() {
@@ -72,8 +74,6 @@ export default function AnalysisPage() {
     if (selected && selected.id === id) setSelected(null);
   };
 
-  // ----------- Экспорт функций -----------
-
   function downloadAnalysis(entry: HistoryEntry, type: 'json' | 'csv') {
     if (!entry) return;
     const filename = `lunar_analysis_${entry.id}.${type}`;
@@ -81,7 +81,6 @@ export default function AnalysisPage() {
     if (type === 'json') {
       content = JSON.stringify(entry, null, 2);
     } else {
-      // CSV
       const fields = Object.keys(entry);
       const csvRow = fields.map(f => `"${(entry as any)[f]}"`).join(',');
       content = fields.join(',') + '\n' + csvRow;
@@ -102,7 +101,6 @@ export default function AnalysisPage() {
     if (type === 'json') {
       content = JSON.stringify(history, null, 2);
     } else {
-      // CSV
       const fields = Object.keys(history[0]);
       content = fields.join(',') + '\n' +
         history.map(entry => fields.map(f => `"${(entry as any)[f]}"`).join(',')).join('\n');
@@ -116,7 +114,57 @@ export default function AnalysisPage() {
     URL.revokeObjectURL(url);
   }
 
-  // ----------- UI -----------
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLoading(true);
+
+    try {
+      let entries: any[] = [];
+      const text = await file.text();
+
+      if (file.name.endsWith('.json')) {
+        const parsed = JSON.parse(text);
+        entries = Array.isArray(parsed) ? parsed : [parsed];
+      } else if (file.name.endsWith('.csv')) {
+        const [headerLine, ...lines] = text.split('\n').map(l => l.trim()).filter(Boolean);
+        const headers = headerLine.split(',').map(h => h.replace(/"/g, ''));
+        entries = lines.map(line => {
+          const values = line.split(',').map(v => v.replace(/"/g, ''));
+          const obj: any = {};
+          headers.forEach((h, i) => obj[h] = values[i]);
+          ['helium3','titanium','silicon','craters','slopes','radioactivity'].forEach(key => {
+            if (obj[key]) obj[key] = Number(obj[key]);
+          });
+          return obj;
+        });
+      } else {
+        alert("Поддерживаются только .json и .csv файлы.");
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch('/api/analysis/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entries),
+      });
+
+      if (res.ok) {
+        const newHistory = await res.json();
+        setHistory(newHistory);
+        alert('Импорт завершён успешно!');
+      } else {
+        alert('Ошибка при импорте');
+      }
+    } catch (err) {
+      alert('Ошибка при импорте файла!');
+      console.error(err);
+    } finally {
+      setLoading(false);
+      e.target.value = '';
+    }
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
@@ -139,6 +187,21 @@ export default function AnalysisPage() {
             <ArrowUpTrayIcon className="w-4 h-4 mr-1" />
             Экспорт JSON
           </button>
+          <input
+            type="file"
+            accept=".json,.csv"
+            ref={importFileRef}
+            style={{ display: "none" }}
+            onChange={handleImportFile}
+          />
+          <label
+            htmlFor="import-file"
+            className="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded cursor-pointer"
+            onClick={() => importFileRef.current?.click()}
+          >
+            <ArrowUpTrayIcon className="w-4 h-4 mr-1 rotate-180" />
+            Импортировать
+          </label>
         </div>
       </header>
 
@@ -234,80 +297,95 @@ export default function AnalysisPage() {
         </div>
       </div>
       {selected && (
-  <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center animate-fade-in">
-    <div
-      className="relative bg-white rounded-2xl shadow-2xl p-8 w-[370px] max-w-[96vw] border border-gray-200"
-      onClick={e => e.stopPropagation()}
-      style={{
-        boxShadow:
-          "0 6px 32px 0 rgba(0,0,0,0.20), 0 1.5px 8px 0 rgba(0,0,0,0.18)",
-      }}
-    >
-      <button
-        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
-        onClick={() => setSelected(null)}
-        aria-label="Закрыть"
-      >
-        <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
-          <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M18 6 6 18M6 6l12 12"/>
-        </svg>
-      </button>
-      <h2 className="text-xl font-bold mb-4 text-center text-gray-900 tracking-tight">Детали анализа</h2>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center animate-fade-in">
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl p-8 w-[370px] max-w-[96vw] border border-gray-200"
+            onClick={e => e.stopPropagation()}
+            style={{
+              boxShadow:
+                "0 6px 32px 0 rgba(0,0,0,0.20), 0 1.5px 8px 0 rgba(0,0,0,0.18)",
+            }}
+          >
+            <button
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
+              onClick={() => setSelected(null)}
+              aria-label="Закрыть"
+            >
+              <svg width="28" height="28" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M18 6 6 18M6 6l12 12"/>
+              </svg>
+            </button>
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-900 tracking-tight">Детали анализа</h2>
 
-      <div className="mb-2 text-gray-600 flex justify-between">
-        <span>Дата:</span>
-        <b className="text-gray-900">{selected.created_at?.slice(0, 16).replace('T', ' ')}</b>
-      </div>
-      <div className="mb-2 text-gray-600 flex justify-between">
-        <span>Координаты:</span>
-        <b className="text-gray-900">{selected.lat}°, {selected.lon}°</b>
-      </div>
-      <div className="mb-4 text-gray-600 flex justify-between">
-        <span>Результат:</span>
-        <b className={`ml-2 ${selected.summary.includes('Высок') ? "text-red-600" : selected.summary.includes('Средн') ? "text-yellow-600" : "text-green-600"}`}>{selected.summary}</b>
-      </div>
+            <div className="mb-2 text-gray-600 flex justify-between">
+              <span>Дата:</span>
+              <b className="text-gray-900">{selected.created_at?.slice(0, 16).replace('T', ' ')}</b>
+            </div>
+            <div className="mb-2 text-gray-600 flex justify-between">
+              <span>Координаты:</span>
+              <b className="text-gray-900">{selected.lat}°, {selected.lon}°</b>
+            </div>
+            <div className="mb-4 text-gray-600 flex justify-between">
+              <span>Результат:</span>
+              <b className={`ml-2 ${selected.summary.includes('Высок') ? "text-red-600" : selected.summary.includes('Средн') ? "text-yellow-600" : "text-green-600"}`}>{selected.summary}</b>
+            </div>
 
-      <div className="border-t border-gray-200 my-4"></div>
+            <div className="border-t border-gray-200 my-4"></div>
 
-      <div className="mb-2 font-semibold text-gray-900 text-sm">Ресурсы:</div>
-      <div className="flex flex-col gap-1 mb-4">
-        <div className="flex justify-between"><span className="text-gray-600">Гелий-3:</span><b className="text-blue-600">{selected.helium3}%</b></div>
-        <div className="flex justify-between"><span className="text-gray-600">Титан:</span><b className="text-green-600">{selected.titanium}%</b></div>
-        <div className="flex justify-between"><span className="text-gray-600">Кремний:</span><b className="text-yellow-600">{selected.silicon}%</b></div>
-      </div>
+            <div className="mb-2 font-semibold text-gray-900 text-sm">Ресурсы:</div>
+            <div className="flex flex-col gap-1 mb-4">
+              <div className="flex justify-between"><span className="text-gray-600">Гелий-3:</span><b className="text-blue-600">{selected.helium3}%</b></div>
+              <div className="flex justify-between"><span className="text-gray-600">Титан:</span><b className="text-green-600">{selected.titanium}%</b></div>
+              <div className="flex justify-between"><span className="text-gray-600">Кремний:</span><b className="text-yellow-600">{selected.silicon}%</b></div>
+            </div>
 
-      <div className="border-t border-gray-200 my-4"></div>
+            <div className="border-t border-gray-200 my-4"></div>
 
-      <div className="mb-2 font-semibold text-gray-900 text-sm">Риски:</div>
-      <div className="flex flex-col gap-1">
-        <div className="flex justify-between"><span className="text-gray-600">Кратеры:</span><b className="text-rose-500">{selected.craters}%</b></div>
-        <div className="flex justify-between"><span className="text-gray-600">Склоны:</span><b className="text-orange-500">{selected.slopes}%</b></div>
-        <div className="flex justify-between"><span className="text-gray-600">Радиоактивность:</span><b className="text-violet-500">{selected.radioactivity}%</b></div>
-      </div>
+            <div className="mb-2 font-semibold text-gray-900 text-sm">Риски:</div>
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between"><span className="text-gray-600">Кратеры:</span><b className="text-rose-500">{selected.craters}%</b></div>
+              <div className="flex justify-between"><span className="text-gray-600">Склоны:</span><b className="text-orange-500">{selected.slopes}%</b></div>
+              <div className="flex justify-between"><span className="text-gray-600">Радиоактивность:</span><b className="text-violet-500">{selected.radioactivity}%</b></div>
+            </div>
 
-      <div className="mt-6 flex flex-col gap-2">
-        <button
-          className="w-full rounded-xl bg-green-600 hover:bg-green-700 transition text-white font-semibold py-2 shadow"
-          onClick={() => downloadAnalysis(selected, 'json')}
-        >
-          Скачать как JSON
-        </button>
-        <button
-          className="w-full rounded-xl bg-amber-500 hover:bg-amber-600 transition text-white font-semibold py-2 shadow"
-          onClick={() => downloadAnalysis(selected, 'csv')}
-        >
-          Скачать как CSV
-        </button>
-      </div>
-      <button
-        className="mt-4 w-full rounded-xl bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 shadow"
-        onClick={() => setSelected(null)}
-      >
-        Закрыть
-      </button>
-    </div>
-  </div>
-)}
+            <div className="mt-6 flex flex-col gap-2">
+              <button
+                className="w-full rounded-xl bg-green-600 hover:bg-green-700 transition text-white font-semibold py-2 shadow"
+                onClick={() => downloadAnalysis(selected, 'json')}
+              >
+                Скачать как JSON
+              </button>
+              <button
+                className="w-full rounded-xl bg-amber-500 hover:bg-amber-600 transition text-white font-semibold py-2 shadow"
+                onClick={() => downloadAnalysis(selected, 'csv')}
+              >
+                Скачать как CSV
+              </button>
+              <input
+                type="file"
+                accept=".json,.csv"
+                ref={importFileSingleRef}
+                style={{ display: "none" }}
+                onChange={handleImportFile}
+              />
+              <label
+                htmlFor="import-file-single"
+                className="mt-3 w-full rounded-xl bg-gray-200 hover:bg-gray-300 transition text-gray-700 font-semibold py-2 shadow cursor-pointer flex items-center justify-center"
+                onClick={() => importFileSingleRef.current?.click()}
+              >
+                <ArrowUpTrayIcon className="w-5 h-5 mr-2 rotate-180" />
+                Импортировать анализ
+              </label>
+            </div>
+            <button
+              className="mt-4 w-full rounded-xl bg-blue-600 hover:bg-blue-700 transition text-white font-semibold py-2 shadow"
+              onClick={() => setSelected(null)}
+            >
+              Закрыть
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
