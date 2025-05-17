@@ -106,9 +106,9 @@ export default function InfrastructurePage() {
       </header>
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="flex-1 bg-white rounded-lg shadow flex items-center justify-center">
-  <div className="w-full h-[400px] rounded-2xl overflow-hidden">
-            <LunarMap />
-          </div>
+<div className="w-full lg:flex-1 bg-white rounded-lg shadow overflow-hidden flex items-stretch">
+          <LunarMap />
+        </div>
           <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
             <button className="bg-white p-1 rounded shadow">
               <ArrowUpIcon className="w-4 h-4" />
