@@ -8,8 +8,10 @@ import {
   BoltIcon,
   CubeIcon,
   ArrowUpTrayIcon,
+  ArrowDownIcon,
   ArrowUpIcon,
   Cog6ToothIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 const LunarMapEmbedInfrastructure = dynamic(() => import('@/components/LunarMapEmbedInfrastructure'), { ssr: false });
@@ -77,11 +79,16 @@ export default function InfrastructurePage() {
     },
   ];
 
+  const selectedRef = useRef<string>(types[0].key);
   const [selected, setSelected] = useState<string>(types[0].key);
   const [mapObjects, setMapObjects] = useState<MapObject[]>([]);
   const [error, setError] = useState<string | null>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const [sideHeight, setSideHeight] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
 
   useEffect(() => {
     if (rightRef.current) {
@@ -93,30 +100,32 @@ export default function InfrastructurePage() {
     return types.find(t => t.key === typeKey)?.color || '#ff3333';
   };
 
-  // Минимальное расстояние между объектами (например, 0.22 радиуса зоны)
-  const MIN_DIST = 0.25;
+  const MIN_DISTANCE = 0.08;
+
+  const isTooClose = (x: number, y: number, z: number) => {
+    return mapObjects.some(obj => {
+      const dx = obj.x - x;
+      const dy = obj.y - y;
+      const dz = obj.z - z;
+      const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      return dist < MIN_DISTANCE;
+    });
+  };
 
   const handleMapClick = useCallback(
     (lat: number, lon: number, point?: { x: number, y: number, z: number }) => {
-      setError(null);
-      if (!selected || !point) return;
-      // Проверка на близость
-      const conflict = mapObjects.some(obj => {
-        const dx = obj.x - point.x;
-        const dy = obj.y - point.y;
-        const dz = obj.z - point.z;
-        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        return dist < MIN_DIST;
-      });
-      if (conflict) {
-        setError("Ошибка: Нельзя поставить объект на зону другого объекта. Пожалуйста, выберите другое место.");
+      if (!selectedRef.current || !point) return;
+      if (isTooClose(point.x, point.y, point.z)) {
+        setError(
+          "Ошибка создания: Вы пытаетесь разместить объект слишком близко к уже существующему. Пожалуйста, выберите другое место."
+        );
         return;
       }
       setMapObjects(prev => [
         ...prev,
         {
           id: Date.now(),
-          typeKey: selected,
+          typeKey: selectedRef.current,
           lat,
           lon,
           x: point.x,
@@ -124,8 +133,9 @@ export default function InfrastructurePage() {
           z: point.z,
         }
       ]);
+      setError(null);
     },
-    [selected, mapObjects]
+    [mapObjects]
   );
 
   return (
@@ -141,11 +151,6 @@ export default function InfrastructurePage() {
           </button>
         </div>
       </header>
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded shadow">
-          {error}
-        </div>
-      )}
       <div className="flex flex-col lg:flex-row gap-6">
         <div
           className="relative flex-1 bg-white rounded-lg shadow overflow-hidden w-full"
@@ -162,6 +167,18 @@ export default function InfrastructurePage() {
           ref={rightRef}
         >
           <h2 className="text-lg font-medium">Планирование объекта</h2>
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-3 flex items-center justify-between">
+              <span>{error}</span>
+              <button
+                className="ml-3"
+                onClick={() => setError(null)}
+                title="Закрыть"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+          )}
           <div className="space-y-2">
             {types.map((t) => (
               <div
@@ -183,7 +200,7 @@ export default function InfrastructurePage() {
           <div className="flex gap-3 mt-4">
             <button
               className="flex-1 bg-blue-600 text-white rounded py-2 px-4"
-              onClick={() => setMapObjects([])}
+              onClick={() => { setMapObjects([]); setError(null); }}
             >
               Сброс
             </button>
@@ -236,6 +253,9 @@ export default function InfrastructurePage() {
               <span>{label}</span>
               <div className="flex items-center space-x-1">
                 <span className="font-medium">{value}{label === 'Среднее расстояние' ? ' M' : '%'}</span>
+                {typeof up === 'boolean' && (
+                  up ? <ArrowUpIcon className="w-4 h-4 text-green-600" /> : <ArrowDownIcon className="w-4 h-4 text-red-600" />
+                )}
               </div>
             </div>
           ))}
