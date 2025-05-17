@@ -3,52 +3,40 @@
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import {
-  HomeIcon,
-  RocketLaunchIcon,
-  BeakerIcon,
-  BoltIcon,
-  CubeIcon,
-} from '@heroicons/react/24/outline';
 
 const getIconSvg = (typeKey: string, color: string) => {
   if (typeKey === 'module') {
     return `
-      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3m10-11v10a1 1 0 01-1 1h-3"/>
+      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="${color}" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
       </svg>
     `;
   }
   if (typeKey === 'launch') {
     return `
-      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M8.25 18.25l1.768-.884a1.823 1.823 0 01.774-.183l2.416.006a1.82 1.82 0 01.776.183l1.766.884M15 21l.337-2.022a1.815 1.815 0 00-.09-.938l-.49-1.274A1.818 1.818 0 0013 15h-2a1.818 1.818 0 00-1.757 1.766l-.49 1.274a1.814 1.814 0 00-.09.938L9 21M5 11c0-4.418 3.134-8 7-8s7 3.582 7 8v0a7 7 0 01-14 0v0z"/>
+      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="${color}" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
       </svg>
     `;
   }
   if (typeKey === 'lab') {
     return `
-      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M7 10V6a5 5 0 0110 0v4m2 0a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2"/>
+      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="${color}" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
       </svg>
     `;
   }
   if (typeKey === 'power') {
     return `
-      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="${color}" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
       </svg>
     `;
   }
   if (typeKey === 'storage') {
     return `
-      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
-        <rect width="18" height="12" x="3" y="8" rx="2"/>
-        <path stroke-linecap="round" stroke-linejoin="round" d="M16 8V6a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="${color}" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
       </svg>
     `;
   }
