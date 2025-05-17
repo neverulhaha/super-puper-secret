@@ -99,25 +99,40 @@ export default function InfrastructurePage() {
   const getTypeColor = (typeKey: string) => {
     return types.find(t => t.key === typeKey)?.color || '#ff3333';
   };
-
-  const MIN_DISTANCE = 0.08;
-
-  const isTooClose = (x: number, y: number, z: number) => {
+  const getZoneRadius = (typeKey: string) => {
+    switch (typeKey) {
+      case 'module':
+        return 0.15;
+      case 'launch':
+        return 0.25;
+      case 'lab':
+        return 0.18;
+      case 'power':
+        return 0.22;
+      case 'storage':
+        return 0.14;
+      default:
+        return 0.14;
+    }
+  };
+  const isTooClose = (typeKey: string, x: number, y: number, z: number) => {
+    const radius = getZoneRadius(typeKey);
     return mapObjects.some(obj => {
+      const otherRadius = getZoneRadius(obj.typeKey);
       const dx = obj.x - x;
       const dy = obj.y - y;
       const dz = obj.z - z;
       const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      return dist < MIN_DISTANCE;
+      return dist < (radius + otherRadius);
     });
   };
 
   const handleMapClick = useCallback(
     (lat: number, lon: number, point?: { x: number, y: number, z: number }) => {
       if (!selectedRef.current || !point) return;
-      if (isTooClose(point.x, point.y, point.z)) {
+      if (isTooClose(selectedRef.current, point.x, point.y, point.z)) {
         setError(
-          "Ошибка создания: Вы пытаетесь разместить объект слишком близко к уже существующему. Пожалуйста, выберите другое место."
+          "Ошибка: Зоны объектов не должны пересекаться. Попробуйте разместить объект дальше от других."
         );
         return;
       }
