@@ -129,5 +129,11 @@ scene.add(earthshine);
     };
   }, []);
 
-  return <div ref={containerRef} style={{ width: '100%', height: '500px', minHeight: 300 }} />;
+  return (
+  <div
+    ref={containerRef}
+    className="w-full h-full"
+    style={{ width: '100%', height: '100%', minHeight: 300 }}
+  />
+  )
 }
