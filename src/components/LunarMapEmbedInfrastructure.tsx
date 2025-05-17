@@ -9,11 +9,14 @@ interface MapObject {
   typeKey: string;
   lat: number;
   lon: number;
+  x: number;
+  y: number;
+  z: number;
   color?: string;
 }
 
 interface Props {
-  onSelectCoords?: (lat: number, lon: number) => void;
+  onSelectCoords?: (lat: number, lon: number, point: { x: number, y: number, z: number }) => void;
   mapObjects?: MapObject[];
   getTypeColor?: (typeKey: string) => string;
 }
@@ -107,7 +110,16 @@ export default function LunarMapEmbedInfrastructure({
         const lat = Math.asin(point.y / radius) * (180 / Math.PI);
         const lon = Math.atan2(point.z, point.x) * (180 / Math.PI);
         if (onSelectCoords) {
-          onSelectCoords(Number(lat.toFixed(3)), Number(lon.toFixed(3)));
+          const offset = 1.08;
+          onSelectCoords(
+            Number(lat.toFixed(3)),
+            Number(lon.toFixed(3)),
+            {
+              x: point.x * offset / radius,
+              y: point.y * offset / radius,
+              z: point.z * offset / radius
+            }
+          );
         }
       }
     };
@@ -151,18 +163,12 @@ export default function LunarMapEmbedInfrastructure({
       group.remove(group.children[0]);
     }
     mapObjects.forEach(obj => {
-      const phi = (90 - obj.lat) * (Math.PI / 180);
-      const theta = (obj.lon + 180) * (Math.PI / 180);
-      const r = 1.08;
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = r * Math.cos(phi);
-      const z = r * Math.sin(phi) * Math.sin(theta);
       const markerGeometry = new THREE.SphereGeometry(0.08, 24, 24);
       const markerMaterial = new THREE.MeshBasicMaterial({
         color: getTypeColor ? getTypeColor(obj.typeKey) : 0xffff00
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-      marker.position.set(x, y, z);
+      marker.position.set(obj.x, obj.y, obj.z);
       group.add(marker);
     });
   }, [mapObjects, getTypeColor]);

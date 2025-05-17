@@ -29,6 +29,9 @@ type MapObject = {
   typeKey: string;
   lat: number;
   lon: number;
+  x: number;
+  y: number;
+  z: number;
 };
 
 export default function InfrastructurePage() {
@@ -86,8 +89,8 @@ export default function InfrastructurePage() {
   const getTypeColor = (typeKey: string) => {
     return types.find(t => t.key === typeKey)?.color || '#ff3333';
   };
-  const handleMapClick = (lat: number, lon: number) => {
-    if (!selected) return;
+  const handleMapClick = (lat: number, lon: number, point?: { x: number, y: number, z: number }) => {
+    if (!selected || !point) return;
     setMapObjects(prev => [
       ...prev,
       {
@@ -95,9 +98,13 @@ export default function InfrastructurePage() {
         typeKey: selected,
         lat,
         lon,
+        x: point.x,
+        y: point.y,
+        z: point.z,
       }
     ]);
   };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-8 text-black">
       <header className="flex justify-between items-center">
