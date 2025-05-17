@@ -8,7 +8,6 @@ import {
   BoltIcon,
   CubeIcon,
   ArrowUpTrayIcon,
-  ArrowDownIcon,
   ArrowUpIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
@@ -78,15 +77,11 @@ export default function InfrastructurePage() {
     },
   ];
 
-  const selectedRef = useRef<string | null>(types[0].key);
-  const [selected, setSelected] = useState<string | null>(types[0].key);
+  const [selected, setSelected] = useState<string>(types[0].key);
   const [mapObjects, setMapObjects] = useState<MapObject[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const [sideHeight, setSideHeight] = useState<number | undefined>(undefined);
-
-  useEffect(() => {
-    selectedRef.current = selected;
-  }, [selected]);
 
   useEffect(() => {
     if (rightRef.current) {
@@ -98,14 +93,30 @@ export default function InfrastructurePage() {
     return types.find(t => t.key === typeKey)?.color || '#ff3333';
   };
 
+  // Минимальное расстояние между объектами (например, 0.22 радиуса зоны)
+  const MIN_DIST = 0.25;
+
   const handleMapClick = useCallback(
     (lat: number, lon: number, point?: { x: number, y: number, z: number }) => {
-      if (!selectedRef.current || !point) return;
+      setError(null);
+      if (!selected || !point) return;
+      // Проверка на близость
+      const conflict = mapObjects.some(obj => {
+        const dx = obj.x - point.x;
+        const dy = obj.y - point.y;
+        const dz = obj.z - point.z;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        return dist < MIN_DIST;
+      });
+      if (conflict) {
+        setError("Ошибка: Нельзя поставить объект на зону другого объекта. Пожалуйста, выберите другое место.");
+        return;
+      }
       setMapObjects(prev => [
         ...prev,
         {
           id: Date.now(),
-          typeKey: selectedRef.current ?? 'module',
+          typeKey: selected,
           lat,
           lon,
           x: point.x,
@@ -114,7 +125,7 @@ export default function InfrastructurePage() {
         }
       ]);
     },
-    []
+    [selected, mapObjects]
   );
 
   return (
@@ -130,6 +141,11 @@ export default function InfrastructurePage() {
           </button>
         </div>
       </header>
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded shadow">
+          {error}
+        </div>
+      )}
       <div className="flex flex-col lg:flex-row gap-6">
         <div
           className="relative flex-1 bg-white rounded-lg shadow overflow-hidden w-full"
@@ -220,9 +236,6 @@ export default function InfrastructurePage() {
               <span>{label}</span>
               <div className="flex items-center space-x-1">
                 <span className="font-medium">{value}{label === 'Среднее расстояние' ? ' M' : '%'}</span>
-                {typeof up === 'boolean' && (
-                  up ? <ArrowUpIcon className="w-4 h-4 text-green-600" /> : <ArrowDownIcon className="w-4 h-4 text-red-600" />
-                )}
               </div>
             </div>
           ))}
