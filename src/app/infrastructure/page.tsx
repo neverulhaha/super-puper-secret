@@ -78,10 +78,15 @@ export default function InfrastructurePage() {
     },
   ];
 
+  const selectedRef = useRef<string | null>(types[0].key);
   const [selected, setSelected] = useState<string | null>(types[0].key);
   const [mapObjects, setMapObjects] = useState<MapObject[]>([]);
   const rightRef = useRef<HTMLDivElement>(null);
   const [sideHeight, setSideHeight] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
 
   useEffect(() => {
     if (rightRef.current) {
@@ -95,12 +100,12 @@ export default function InfrastructurePage() {
 
   const handleMapClick = useCallback(
     (lat: number, lon: number, point?: { x: number, y: number, z: number }) => {
-      if (!selected || !point) return;
+      if (!selectedRef.current || !point) return;
       setMapObjects(prev => [
         ...prev,
         {
           id: Date.now(),
-          typeKey: selected,
+          typeKey: selectedRef.current ?? 'module',
           lat,
           lon,
           x: point.x,
@@ -109,7 +114,7 @@ export default function InfrastructurePage() {
         }
       ]);
     },
-    [selected]
+    []
   );
 
   return (
@@ -146,9 +151,7 @@ export default function InfrastructurePage() {
               <div
                 key={t.key}
                 className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer ${selected === t.key ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-400'} transition`}
-                onClick={() => {
-                  setSelected(t.key)
-                }}
+                onClick={() => setSelected(t.key)}
               >
                 <div className="flex items-center gap-3">
                   {t.icon}
