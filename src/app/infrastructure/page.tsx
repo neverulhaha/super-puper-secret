@@ -1,4 +1,6 @@
 'use client';
+import dynamic from "next/dynamic";
+const LunarMap = dynamic(() => import('@/components/LunarMapEmbed'), { ssr: false });
 import React, { useState } from 'react';
 import {
   HomeIcon,
@@ -157,6 +159,13 @@ export default function InfrastructurePage() {
           </div>
         </div>
       </div>
+      <div className="bg-white rounded-lg shadow p-6 space-y-4">
+        <h2 className="text-lg font-semibold mb-2">3D-карта Луны</h2>
+        <div className="h-96">
+          <LunarMap />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <div className="flex justify-between items-center">
