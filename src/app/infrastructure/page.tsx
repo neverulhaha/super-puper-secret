@@ -92,7 +92,7 @@ export default function InfrastructurePage() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen space-y-8 text-black p-6">
+    <div className="bg-gray-50 min-h-screen space-y-8 text-black pr-6 pt-6 pb-6 pl-0 lg:pl-6">
       <header className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Планирование инфраструктуры</h1>
         <div className="space-x-2">
@@ -105,7 +105,7 @@ export default function InfrastructurePage() {
         </div>
       </header>
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="relative flex-1 bg-white rounded-lg shadow h-[520px] overflow-hidden">
+        <div className="relative flex-1 bg-white rounded-lg shadow h-96 overflow-hidden">
           <div className="w-full h-full">
             <LunarMap />
           </div>
@@ -128,7 +128,7 @@ export default function InfrastructurePage() {
               </div>
             ))}
         </div>
-        <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4 h-[520px]">
+        <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-medium">Планирование объекта</h2>
           <div className="space-y-2">
             {types.map((t) => (
