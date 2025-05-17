@@ -1,6 +1,6 @@
 'use client';
 import dynamic from "next/dynamic";
-const LunarMap = dynamic(() => import('@/components/LunarMapEmbed'), { ssr: false });
+const LunarMap = dynamic(() => import('@/components/LunarMapEmbedInfrastructure'), { ssr: false });
 import React, { useRef, useEffect, useState } from 'react';
 import {
   HomeIcon,
