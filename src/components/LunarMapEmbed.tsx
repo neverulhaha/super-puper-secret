@@ -38,7 +38,7 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    const starTexture = new THREE.TextureLoader().load('/stars2.jpg');
+    const starTexture = new THREE.TextureLoader().load('/stars.jpg');
     const starGeometry = new THREE.SphereGeometry(100, 64, 64);
     const starMaterial = new THREE.MeshBasicMaterial({
       map: starTexture,
