@@ -1,6 +1,5 @@
 'use client';
 import dynamic from "next/dynamic";
-const LunarMap = dynamic(() => import('@/components/LunarMapEmbedInfrastructure'), { ssr: false });
 import React, { useRef, useEffect, useState } from 'react';
 import {
   HomeIcon,
@@ -14,6 +13,8 @@ import {
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 
+const LunarMapEmbedInfrastructure = dynamic(() => import('@/components/LunarMapEmbedInfrastructure'), { ssr: false });
+
 type InfrastructureType = {
   key: string;
   name: string;
@@ -23,12 +24,11 @@ type InfrastructureType = {
   color: string;
 };
 
-type Placement = {
+type MapObject = {
   id: number;
-  x: string;
-  y: string;
-  w: string;
-  h: string;
+  typeKey: string;
+  lat: number;
+  lon: number;
 };
 
 export default function InfrastructurePage() {
@@ -39,7 +39,7 @@ export default function InfrastructurePage() {
       description: 'Для экипажа и жизнеобеспечения',
       range: '100–300 м²',
       icon: <HomeIcon className="w-5 h-5 text-blue-600" />,
-      color: 'border-blue-400',
+      color: '#3b82f6'
     },
     {
       key: 'launch',
@@ -47,7 +47,7 @@ export default function InfrastructurePage() {
       description: 'Запуск и посадка ракет',
       range: '1000–2000 м²',
       icon: <RocketLaunchIcon className="w-5 h-5 text-purple-600" />,
-      color: 'border-purple-400',
+      color: '#a855f7'
     },
     {
       key: 'lab',
@@ -55,7 +55,7 @@ export default function InfrastructurePage() {
       description: 'Анализ образцов и эксперименты',
       range: '200–500 м²',
       icon: <BeakerIcon className="w-5 h-5 text-green-600" />,
-      color: 'border-green-400',
+      color: '#22c55e'
     },
     {
       key: 'power',
@@ -63,7 +63,7 @@ export default function InfrastructurePage() {
       description: 'Генерация энергии',
       range: '300–1000 м²',
       icon: <BoltIcon className="w-5 h-5 text-yellow-600" />,
-      color: 'border-yellow-400',
+      color: '#f59e42'
     },
     {
       key: 'storage',
@@ -71,23 +71,33 @@ export default function InfrastructurePage() {
       description: 'Складские помещения',
       range: '150–400 м²',
       icon: <CubeIcon className="w-5 h-5 text-red-600" />,
-      color: 'border-red-400',
+      color: '#f43f5e'
     },
   ];
-
   const [selected, setSelected] = useState<string | null>(types[0].key);
-  const [calculated, setCalculated] = useState(false);
-  const [placements, setPlacements] = useState<Placement[]>([]);
-
+  const [mapObjects, setMapObjects] = useState<MapObject[]>([]);
   const rightRef = useRef<HTMLDivElement>(null);
   const [sideHeight, setSideHeight] = useState<number | undefined>(undefined);
-
   useEffect(() => {
     if (rightRef.current) {
       setSideHeight(rightRef.current.offsetHeight);
     }
-  }, [rightRef.current, types.length]);
-
+  }, [rightRef.current, types.length, mapObjects.length]);
+  const getTypeColor = (typeKey: string) => {
+    return types.find(t => t.key === typeKey)?.color || '#ff3333';
+  };
+  const handleMapClick = (lat: number, lon: number) => {
+    if (!selected) return;
+    setMapObjects(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        typeKey: selected,
+        lat,
+        lon,
+      }
+    ]);
+  };
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-8 text-black">
       <header className="flex justify-between items-center">
@@ -106,7 +116,11 @@ export default function InfrastructurePage() {
           className="relative flex-1 bg-white rounded-lg shadow overflow-hidden w-full"
           style={sideHeight ? { height: sideHeight } : { minHeight: 400 }}
         >
-          <LunarMap />
+          <LunarMapEmbedInfrastructure
+            onSelectCoords={handleMapClick}
+            mapObjects={mapObjects}
+            getTypeColor={getTypeColor}
+          />
           <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
             <button className="bg-white p-1 rounded shadow">
               <ArrowUpIcon className="w-4 h-4" />
@@ -115,16 +129,6 @@ export default function InfrastructurePage() {
               <ArrowDownIcon className="w-4 h-4" />
             </button>
           </div>
-          {calculated &&
-            placements.map((p) => (
-              <div
-                key={p.id}
-                className={`absolute border-2 border-dashed bg-white/50 rounded ${types.find(t => t.key === selected)?.color}`}
-                style={{ top: p.y, left: p.x, width: p.w, height: p.h }}
-              >
-                {types.find(t => t.key === selected)?.icon}
-              </div>
-            ))}
         </div>
         <div
           className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4"
@@ -152,16 +156,7 @@ export default function InfrastructurePage() {
           <div className="flex gap-3 mt-4">
             <button
               className="flex-1 bg-blue-600 text-white rounded py-2 px-4"
-              onClick={() => setCalculated(true)}
-            >
-              Рассчитать
-            </button>
-            <button
-              className="flex-1 bg-gray-200 text-gray-700 rounded py-2 px-4"
-              onClick={() => {
-                setCalculated(false);
-                setPlacements([]);
-              }}
+              onClick={() => setMapObjects([])}
             >
               Сброс
             </button>

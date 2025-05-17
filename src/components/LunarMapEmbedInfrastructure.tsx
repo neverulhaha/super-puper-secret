@@ -4,40 +4,44 @@ import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
+interface MapObject {
+  id: number;
+  typeKey: string;
+  lat: number;
+  lon: number;
+  color?: string;
+}
+
 interface Props {
   onSelectCoords?: (lat: number, lon: number) => void;
+  mapObjects?: MapObject[];
+  getTypeColor?: (typeKey: string) => string;
 }
 
 const MOON_TEXTURE_URL = '/moon_8k_color_brim16.jpg';
 
-export default function LunarMapEmbed({ onSelectCoords }: Props) {
-  console.log('LunarMapEmbed mounted');
+export default function LunarMapEmbedInfrastructure({ onSelectCoords, mapObjects = [], getTypeColor }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<any>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const moonRef = useRef<THREE.Mesh | null>(null);
+  const markerGroupRef = useRef<THREE.Group | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
-
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-
     const width = containerRef.current.offsetWidth;
     const height = containerRef.current.offsetHeight;
-    const initialCameraZ = 3;
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
     camera.position.z = 3;
     cameraRef.current = camera;
-
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
-
     const starTexture = new THREE.TextureLoader().load('/stars.jpg');
     const starGeometry = new THREE.SphereGeometry(100, 64, 64);
     const starMaterial = new THREE.MeshBasicMaterial({
@@ -46,18 +50,14 @@ export default function LunarMapEmbed({ onSelectCoords }: Props) {
     });
     const starSphere = new THREE.Mesh(starGeometry, starMaterial);
     scene.add(starSphere);
-
-const sunLight = new THREE.DirectionalLight(0xffffff, 0.3);
-sunLight.position.set(5, 3, 10);
-scene.add(sunLight);
-
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
-scene.add(ambientLight);
-
-const earthshine = new THREE.DirectionalLight(0x4477aa, 0.09);
-earthshine.position.set(-7, -2, -9);
-scene.add(earthshine);
-
+    const sunLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    sunLight.position.set(5, 3, 10);
+    scene.add(sunLight);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+    scene.add(ambientLight);
+    const earthshine = new THREE.DirectionalLight(0x4477aa, 0.09);
+    earthshine.position.set(-7, -2, -9);
+    scene.add(earthshine);
     const loader = new THREE.TextureLoader();
     loader.load(MOON_TEXTURE_URL, (texture) => {
       const geometry = new THREE.SphereGeometry(1, 64, 64);
@@ -66,16 +66,15 @@ scene.add(earthshine);
       scene.add(moon);
       moonRef.current = moon;
     });
-
+    const markerGroup = new THREE.Group();
+    scene.add(markerGroup);
+    markerGroupRef.current = markerGroup;
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-
     controls.minDistance = 1.2;
     controls.maxDistance = 3;
-
     controlsRef.current = controls;
-
     const handleClick = (event: MouseEvent) => {
       if (!moonRef.current || !cameraRef.current || !rendererRef.current) return;
       const rect = renderer.domElement.getBoundingClientRect();
@@ -97,7 +96,6 @@ scene.add(earthshine);
       }
     };
     renderer.domElement.addEventListener('click', handleClick);
-
     const handleResize = () => {
       if (!containerRef.current || !rendererRef.current || !cameraRef.current) return;
       const width = containerRef.current.offsetWidth;
@@ -107,7 +105,6 @@ scene.add(earthshine);
       cameraRef.current.updateProjectionMatrix();
     };
     window.addEventListener('resize', handleResize);
-
     let isUnmounted = false;
     const animate = () => {
       if (isUnmounted) return;
@@ -116,7 +113,6 @@ scene.add(earthshine);
       requestAnimationFrame(animate);
     };
     animate();
-
     return () => {
       isUnmounted = true;
       window.removeEventListener('resize', handleResize);
@@ -128,12 +124,33 @@ scene.add(earthshine);
       }
     };
   }, []);
-
+  useEffect(() => {
+    if (!markerGroupRef.current) return;
+    const group = markerGroupRef.current;
+    while (group.children.length > 0) {
+      group.remove(group.children[0]);
+    }
+    mapObjects.forEach(obj => {
+      const phi = (90 - obj.lat) * (Math.PI / 180);
+      const theta = (obj.lon + 180) * (Math.PI / 180);
+      const r = 1.03;
+      const x = r * Math.sin(phi) * Math.cos(theta);
+      const y = r * Math.cos(phi);
+      const z = r * Math.sin(phi) * Math.sin(theta);
+      const markerGeometry = new THREE.SphereGeometry(0.03, 24, 24);
+      const markerMaterial = new THREE.MeshBasicMaterial({
+        color: getTypeColor ? getTypeColor(obj.typeKey) : 0xff3333
+      });
+      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+      marker.position.set(x, y, z);
+      group.add(marker);
+    });
+  }, [mapObjects, getTypeColor]);
   return (
-  <div
-    ref={containerRef}
-    className="w-full h-full"
-    style={{ width: '100%', height: '100%', minHeight: 300 }}
-  />
-  )
+    <div
+      ref={containerRef}
+      className="w-full h-full"
+      style={{ width: '100%', height: '100%', minHeight: 300 }}
+    />
+  );
 }
