@@ -92,7 +92,7 @@ export default function InfrastructurePage() {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen space-y-8 text-black">
+    <div className="bg-gray-50 min-h-screen space-y-8 text-black pr-6 pt-6 pb-6 pl-0 lg:pl-6">
       <header className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Планирование инфраструктуры</h1>
         <div className="space-x-2">
@@ -105,8 +105,10 @@ export default function InfrastructurePage() {
         </div>
       </header>
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="relative flex-1 bg-white rounded-lg shadow h-96 overflow-hidden w-full h-full ">
-          <LunarMap  />
+        <div className="relative flex-1 bg-white rounded-lg shadow h-96 overflow-hidden">
+          <div className="w-full h-full">
+            <LunarMap />
+          </div>
           <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
             <button className="bg-white p-1 rounded shadow">
               <ArrowUpIcon className="w-4 h-4" />
