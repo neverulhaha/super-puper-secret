@@ -92,10 +92,10 @@ export default function InfrastructurePage() {
     return types.find(t => t.key === typeKey)?.color || '#ff3333';
   };
 
-  // Главное исправление — используем useCallback и зависимость от selected!
   const handleMapClick = useCallback(
     (lat: number, lon: number, point?: { x: number, y: number, z: number }) => {
       if (!selected || !point) return;
+      console.log('Selected type:', selected); 
       setMapObjects(prev => [
         ...prev,
         {
