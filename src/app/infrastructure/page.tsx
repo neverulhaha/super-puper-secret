@@ -105,13 +105,10 @@ export default function InfrastructurePage() {
         </div>
       </header>
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* === ЛЕВЫЙ БЛОК: 3D-карта Луны === */}
-        <div className="relative flex-1 bg-white rounded-lg shadow h-96 overflow-hidden">
-          {/* Вставляем карту во весь блок */}
-          <div className="absolute inset-0">
+        <div className="flex-1 bg-white rounded-lg shadow flex items-center justify-center">
+  <div className="w-full h-[400px] rounded-2xl overflow-hidden">
             <LunarMap />
           </div>
-          {/* Кнопки управления и размещения (оставлены поверх карты) */}
           <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
             <button className="bg-white p-1 rounded shadow">
               <ArrowUpIcon className="w-4 h-4" />
@@ -131,7 +128,6 @@ export default function InfrastructurePage() {
               </div>
             ))}
         </div>
-        {/* === ПРАВЫЙ БЛОК: список объектов и кнопки === */}
         <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-medium">Планирование объекта</h2>
           <div className="space-y-2">
@@ -165,8 +161,6 @@ export default function InfrastructurePage() {
           </div>
         </div>
       </div>
-
-      {/* ОСТАЛЬНОЕ СТРАНИЦЫ (можно не трогать) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <div className="flex justify-between items-center">
