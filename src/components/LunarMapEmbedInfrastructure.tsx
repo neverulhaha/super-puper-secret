@@ -3,6 +3,65 @@
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import {
+  HomeIcon,
+  RocketLaunchIcon,
+  BeakerIcon,
+  BoltIcon,
+  CubeIcon,
+} from '@heroicons/react/24/outline';
+
+const getIconSvg = (typeKey: string, color: string) => {
+  if (typeKey === 'module') {
+    return `
+      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3m10-11v10a1 1 0 01-1 1h-3"/>
+      </svg>
+    `;
+  }
+  if (typeKey === 'launch') {
+    return `
+      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M8.25 18.25l1.768-.884a1.823 1.823 0 01.774-.183l2.416.006a1.82 1.82 0 01.776.183l1.766.884M15 21l.337-2.022a1.815 1.815 0 00-.09-.938l-.49-1.274A1.818 1.818 0 0013 15h-2a1.818 1.818 0 00-1.757 1.766l-.49 1.274a1.814 1.814 0 00-.09.938L9 21M5 11c0-4.418 3.134-8 7-8s7 3.582 7 8v0a7 7 0 01-14 0v0z"/>
+      </svg>
+    `;
+  }
+  if (typeKey === 'lab') {
+    return `
+      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M7 10V6a5 5 0 0110 0v4m2 0a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2"/>
+      </svg>
+    `;
+  }
+  if (typeKey === 'power') {
+    return `
+      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      </svg>
+    `;
+  }
+  if (typeKey === 'storage') {
+    return `
+      <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+        <rect width="18" height="12" x="3" y="8" rx="2"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 8V6a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+      </svg>
+    `;
+  }
+  return `
+    <svg width="96" height="96" fill="none" viewBox="0 0 24 24" stroke="${color}" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="8" />
+    </svg>
+  `;
+};
+
+function svgToDataUrl(svg: string) {
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
 
 interface MapObject {
   id: number;
@@ -170,25 +229,26 @@ export default function LunarMapEmbedInfrastructure({
       if (obj.typeKey === 'power') radius = 0.22;
       if (obj.typeKey === 'storage') radius = 0.14;
       const color = getTypeColor ? getTypeColor(obj.typeKey) : '#2196f3';
+
       const zoneGeometry = new THREE.SphereGeometry(radius, 32, 32);
       const zoneMaterial = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: 0.25,
+        opacity: 0.22,
         depthWrite: false
       });
       const zoneMesh = new THREE.Mesh(zoneGeometry, zoneMaterial);
       zoneMesh.position.set(obj.x, obj.y, obj.z);
       group.add(zoneMesh);
-      const markerGeometry = new THREE.SphereGeometry(0.05, 24, 24);
-      const markerMaterial = new THREE.MeshBasicMaterial({
-        color: color,
-        transparent: false,
-        opacity: 1
-      });
-      const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-      marker.position.set(obj.x, obj.y, obj.z);
-      group.add(marker);
+
+      const svg = getIconSvg(obj.typeKey, color);
+      const dataUrl = svgToDataUrl(svg);
+      const map = new THREE.TextureLoader().load(dataUrl);
+      const spriteMaterial = new THREE.SpriteMaterial({ map: map, depthWrite: false });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.position.set(obj.x, obj.y, obj.z);
+      sprite.scale.set(0.18, 0.18, 1);
+      group.add(sprite);
     });
   }, [mapObjects, getTypeColor]);
 

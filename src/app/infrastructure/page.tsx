@@ -135,7 +135,7 @@ export default function InfrastructurePage() {
           className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4"
           ref={rightRef}
         >
-          <h2 className="text-lg font-medium">Планирование объекта</h2>ы
+          <h2 className="text-lg font-medium">Планирование объекта</h2>
           <div className="space-y-2">
             {types.map((t) => (
               <div
