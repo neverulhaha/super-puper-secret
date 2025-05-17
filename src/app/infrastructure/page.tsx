@@ -77,6 +77,7 @@ export default function InfrastructurePage() {
       color: '#f43f5e'
     },
   ];
+
   const [selected, setSelected] = useState<string | null>(types[0].key);
   const [mapObjects, setMapObjects] = useState<MapObject[]>([]);
   const rightRef = useRef<HTMLDivElement>(null);
@@ -95,7 +96,6 @@ export default function InfrastructurePage() {
   const handleMapClick = useCallback(
     (lat: number, lon: number, point?: { x: number, y: number, z: number }) => {
       if (!selected || !point) return;
-      console.log('Selected type:', selected); 
       setMapObjects(prev => [
         ...prev,
         {
@@ -135,8 +135,6 @@ export default function InfrastructurePage() {
             mapObjects={mapObjects}
             getTypeColor={getTypeColor}
           />
-          <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
-          </div>
         </div>
         <div
           className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4"
@@ -148,7 +146,9 @@ export default function InfrastructurePage() {
               <div
                 key={t.key}
                 className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer ${selected === t.key ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-400'} transition`}
-                onClick={() => setSelected(t.key)}
+                onClick={() => {
+                  setSelected(t.key)
+                }}
               >
                 <div className="flex items-center gap-3">
                   {t.icon}
