@@ -1,7 +1,7 @@
 'use client';
 import dynamic from "next/dynamic";
 const LunarMap = dynamic(() => import('@/components/LunarMapEmbed'), { ssr: false });
-import React, { useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   HomeIcon,
   RocketLaunchIcon,
@@ -75,21 +75,18 @@ export default function InfrastructurePage() {
     },
   ];
 
-  const [selected, setSelected] = useState<string>(types[0].key);
-  const [placements, setPlacements] = useState<Placement[]>([]);
+  const [selected, setSelected] = useState<string | null>(types[0].key);
   const [calculated, setCalculated] = useState(false);
+  const [placements, setPlacements] = useState<Placement[]>([]);
 
-  const handleCalculate = () => {
-    const mock: Placement[] = types.slice(0, 3).map((_, i) => ({
-      id: i + 1,
-      x: `${10 + i * 30}%`,
-      y: `${15 + i * 20}%`,
-      w: `${20 + i * 10}%`,
-      h: `${15 + i * 5}%`,
-    }));
-    setPlacements(mock);
-    setCalculated(true);
-  };
+  const rightRef = useRef<HTMLDivElement>(null);
+  const [sideHeight, setSideHeight] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (rightRef.current) {
+      setSideHeight(rightRef.current.offsetHeight);
+    }
+  }, [rightRef.current, types.length]);
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-8 text-black">
@@ -105,8 +102,11 @@ export default function InfrastructurePage() {
         </div>
       </header>
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="relative flex-1 bg-white rounded-lg shadow h-96 overflow-hidden w-full h-full ">
-          <LunarMap  />
+        <div
+          className="relative flex-1 bg-white rounded-lg shadow overflow-hidden w-full"
+          style={sideHeight ? { height: sideHeight } : { minHeight: 400 }}
+        >
+          <LunarMap />
           <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
             <button className="bg-white p-1 rounded shadow">
               <ArrowUpIcon className="w-4 h-4" />
@@ -126,34 +126,43 @@ export default function InfrastructurePage() {
               </div>
             ))}
         </div>
-        <div className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4">
+        <div
+          className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4"
+          ref={rightRef}
+        >
           <h2 className="text-lg font-medium">Планирование объекта</h2>
           <div className="space-y-2">
             {types.map((t) => (
               <div
                 key={t.key}
-                className={`flex items-center justify-between p-3 border rounded cursor-pointer ${selected === t.key ? 'border-blue-400 bg-blue-50' : 'border-gray-200'}`}
+                className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer ${selected === t.key ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-400'} transition`}
                 onClick={() => setSelected(t.key)}
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   {t.icon}
                   <div>
-                    <p className="font-medium">{t.name}</p>
-                    <p className="text-sm text-gray-500">{t.description}</p>
+                    <div className="font-medium">{t.name}</div>
+                    <div className="text-sm text-gray-500">{t.description}</div>
                   </div>
                 </div>
-                <span className="text-sm text-gray-700">{t.range}</span>
+                <div className="font-semibold text-gray-600">{t.range}</div>
               </div>
             ))}
           </div>
-          <div className="flex space-x-2 pt-4">
+          <div className="flex gap-3 mt-4">
             <button
-              onClick={handleCalculate}
-              className="flex-1 inline-flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded"
+              className="flex-1 bg-blue-600 text-white rounded py-2 px-4"
+              onClick={() => setCalculated(true)}
             >
               Рассчитать
             </button>
-            <button className="flex-1 inline-flex items-center justify-center bg-gray-200 text-gray-700 px-4 py-2 rounded">
+            <button
+              className="flex-1 bg-gray-200 text-gray-700 rounded py-2 px-4"
+              onClick={() => {
+                setCalculated(false);
+                setPlacements([]);
+              }}
+            >
               Сброс
             </button>
           </div>
