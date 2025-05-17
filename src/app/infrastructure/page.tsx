@@ -1,6 +1,6 @@
 'use client';
 import dynamic from "next/dynamic";
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   HomeIcon,
   RocketLaunchIcon,
@@ -81,29 +81,36 @@ export default function InfrastructurePage() {
   const [mapObjects, setMapObjects] = useState<MapObject[]>([]);
   const rightRef = useRef<HTMLDivElement>(null);
   const [sideHeight, setSideHeight] = useState<number | undefined>(undefined);
+
   useEffect(() => {
     if (rightRef.current) {
       setSideHeight(rightRef.current.offsetHeight);
     }
   }, [rightRef.current, types.length, mapObjects.length]);
+
   const getTypeColor = (typeKey: string) => {
     return types.find(t => t.key === typeKey)?.color || '#ff3333';
   };
-  const handleMapClick = (lat: number, lon: number, point?: { x: number, y: number, z: number }) => {
-    if (!selected || !point) return;
-    setMapObjects(prev => [
-      ...prev,
-      {
-        id: Date.now(),
-        typeKey: selected,
-        lat,
-        lon,
-        x: point.x,
-        y: point.y,
-        z: point.z,
-      }
-    ]);
-  };
+
+  // Главное исправление — используем useCallback и зависимость от selected!
+  const handleMapClick = useCallback(
+    (lat: number, lon: number, point?: { x: number, y: number, z: number }) => {
+      if (!selected || !point) return;
+      setMapObjects(prev => [
+        ...prev,
+        {
+          id: Date.now(),
+          typeKey: selected,
+          lat,
+          lon,
+          x: point.x,
+          y: point.y,
+          z: point.z,
+        }
+      ]);
+    },
+    [selected]
+  );
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-8 text-black">
