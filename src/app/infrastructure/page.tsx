@@ -129,19 +129,13 @@ export default function InfrastructurePage() {
             getTypeColor={getTypeColor}
           />
           <div className="absolute top-2 right-2 flex flex-col space-y-2 z-10">
-            <button className="bg-white p-1 rounded shadow">
-              <ArrowUpIcon className="w-4 h-4" />
-            </button>
-            <button className="bg-white p-1 rounded shadow">
-              <ArrowDownIcon className="w-4 h-4" />
-            </button>
           </div>
         </div>
         <div
           className="w-full lg:w-1/3 bg-white rounded-lg shadow p-6 space-y-4"
           ref={rightRef}
         >
-          <h2 className="text-lg font-medium">Планирование объекта</h2>
+          <h2 className="text-lg font-medium">Планирование объекта</h2>ы
           <div className="space-y-2">
             {types.map((t) => (
               <div

@@ -163,9 +163,28 @@ export default function LunarMapEmbedInfrastructure({
       group.remove(group.children[0]);
     }
     mapObjects.forEach(obj => {
-      const markerGeometry = new THREE.SphereGeometry(0.08, 24, 24);
+      let radius = 0.14;
+      if (obj.typeKey === 'module') radius = 0.15;
+      if (obj.typeKey === 'launch') radius = 0.25;
+      if (obj.typeKey === 'lab') radius = 0.18;
+      if (obj.typeKey === 'power') radius = 0.22;
+      if (obj.typeKey === 'storage') radius = 0.14;
+      const color = getTypeColor ? getTypeColor(obj.typeKey) : '#2196f3';
+      const zoneGeometry = new THREE.SphereGeometry(radius, 32, 32);
+      const zoneMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.25,
+        depthWrite: false
+      });
+      const zoneMesh = new THREE.Mesh(zoneGeometry, zoneMaterial);
+      zoneMesh.position.set(obj.x, obj.y, obj.z);
+      group.add(zoneMesh);
+      const markerGeometry = new THREE.SphereGeometry(0.05, 24, 24);
       const markerMaterial = new THREE.MeshBasicMaterial({
-        color: getTypeColor ? getTypeColor(obj.typeKey) : 0xffff00
+        color: color,
+        transparent: false,
+        opacity: 1
       });
       const marker = new THREE.Mesh(markerGeometry, markerMaterial);
       marker.position.set(obj.x, obj.y, obj.z);
