@@ -276,21 +276,17 @@ export default function AnalysisPage() {
   });
 
   const filteredHistory = history.filter(entry => {
-    // Search по summary (и доп. полям при желании)
     if (search && !entry.summary.toLowerCase().includes(search.toLowerCase())) {
       return false;
     }
-    // Date filter
     if (dateRange.from && entry.created_at < dateRange.from) return false;
     if (dateRange.to && entry.created_at > dateRange.to) return false;
-    // Coords filter
     const lat = parseFloat(entry.lat);
     const lon = parseFloat(entry.lon);
     if (coordsFilter.minLat && lat < parseFloat(coordsFilter.minLat)) return false;
     if (coordsFilter.maxLat && lat > parseFloat(coordsFilter.maxLat)) return false;
     if (coordsFilter.minLon && lon < parseFloat(coordsFilter.minLon)) return false;
     if (coordsFilter.maxLon && lon > parseFloat(coordsFilter.maxLon)) return false;
-    // Resource filters
     if (resourceFilter.helium3 && entry.helium3 < parseFloat(resourceFilter.helium3)) return false;
     if (resourceFilter.titanium && entry.titanium < parseFloat(resourceFilter.titanium)) return false;
     if (resourceFilter.silicon && entry.silicon < parseFloat(resourceFilter.silicon)) return false;
