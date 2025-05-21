@@ -113,7 +113,7 @@ function getArcPointsBetweenZones(
   const fromArc = fromEdge.clone().normalize().multiplyScalar(arcRadius)
   const toArc = toEdge.clone()
     .normalize()
-    .multiplyScalar(arcRadius - 1 * toZoneRadius)
+    .multiplyScalar(arcRadius - 0.13 * toZoneRadius)
 
   const points: ArcPoint[] = []
   for (let i = 0; i <= segments; i++) {
