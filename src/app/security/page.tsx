@@ -1,6 +1,5 @@
-// app/security/page.tsx
 'use client';
-import React, { useState, useEffect, ReactNode } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ShieldCheckIcon,
   ExclamationTriangleIcon,
@@ -12,11 +11,12 @@ import {
   DocumentTextIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
 
 interface SystemStatus {
   id: number;
   name: string;
-  icon: ReactNode;
+  icon: React.ReactNode;
   status: 'OK' | 'Warning' | 'Critical';
   metrics: { label: string; value: string }[];
   last: string;
@@ -37,8 +37,9 @@ interface Protocol {
   subtitle: string;
   updated: string;
   color: 'red' | 'blue' | 'green';
-  icon: ReactNode;
+  icon: React.ReactNode;
   steps: string[];
+  active?: boolean;
 }
 
 export default function SecurityPage() {
@@ -50,7 +51,12 @@ export default function SecurityPage() {
   ]);
   const [systems, setSystems] = useState<SystemStatus[]>([]);
   const [signals, setSignals] = useState<Signal[]>([]);
-  const [protocols] = useState<Protocol[]>([
+  const [filter, setFilter] = useState<'all' | 'low' | 'medium' | 'high'>('all');
+  const [showSignalModal, setShowSignalModal] = useState(false);
+  const [signalForm, setSignalForm] = useState<Omit<Signal, 'id' | 'time' | 'badge'>>({
+    title: '', description: '', severity: 'low'
+  });
+  const [protocols, setProtocols] = useState<Protocol[]>([
     {
       id: 1,
       title: 'Протокол экстренного реагирования',
@@ -94,6 +100,7 @@ export default function SecurityPage() {
       ],
     },
   ]);
+  const [activatedId, setActivatedId] = useState<number | null>(null);
 
   useEffect(() => {
     setSystems([
@@ -174,6 +181,33 @@ export default function SecurityPage() {
     ]);
   }, []);
 
+  function resolveSignal(id: number) {
+    setSignals(arr => arr.filter(s => s.id !== id));
+    toast.success('Сигнал решён!');
+  }
+
+  function addSignal() {
+    setSignals(arr => [
+      {
+        id: Date.now(),
+        title: signalForm.title,
+        description: signalForm.description,
+        severity: signalForm.severity,
+        badge: 'Активно',
+        time: 'Только что',
+      },
+      ...arr,
+    ]);
+    setShowSignalModal(false);
+    setSignalForm({ title: '', description: '', severity: 'low' });
+    toast.success('Новый сигнал добавлен!');
+  }
+
+  function activateProtocol(id: number) {
+    setActivatedId(id);
+    toast.info('Протокол активирован!');
+  }
+
   const statusColor = (s: SystemStatus['status']) =>
     s === 'OK'
       ? 'bg-green-100 text-green-600'
@@ -190,6 +224,41 @@ export default function SecurityPage() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen space-y-8">
+      {showSignalModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Добавить сигнал</h2>
+            <input
+              type="text"
+              placeholder="Заголовок"
+              className="w-full mb-2 border rounded px-2 py-1"
+              value={signalForm.title}
+              onChange={e => setSignalForm(f => ({ ...f, title: e.target.value }))}
+            />
+            <input
+              type="text"
+              placeholder="Описание"
+              className="w-full mb-2 border rounded px-2 py-1"
+              value={signalForm.description}
+              onChange={e => setSignalForm(f => ({ ...f, description: e.target.value }))}
+            />
+            <select
+              className="w-full mb-4 border rounded px-2 py-1"
+              value={signalForm.severity}
+              onChange={e => setSignalForm(f => ({ ...f, severity: e.target.value as Signal['severity'] }))}
+            >
+              <option value="low">Низкий</option>
+              <option value="medium">Средний</option>
+              <option value="high">Высокий</option>
+            </select>
+            <div className="flex gap-2">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded" onClick={addSignal}>Добавить</button>
+              <button className="bg-gray-300 px-4 py-2 rounded" onClick={() => setShowSignalModal(false)}>Отмена</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Центр управления безопасностью</h1>
         <div className="space-x-2">
@@ -197,7 +266,10 @@ export default function SecurityPage() {
             <ExclamationTriangleIcon className="w-5 h-5 mr-1" />
             Экстренный протокол
           </button>
-          <button className="inline-flex items-center bg-gray-200 text-gray-700 px-4 py-2 rounded">
+          <button
+            className="inline-flex items-center bg-gray-200 text-gray-700 px-4 py-2 rounded"
+            onClick={() => toast.info('Журнал экспортирован!')}
+          >
             <ArrowPathIcon className="w-5 h-5 mr-1" />
             Экспорт журнала
           </button>
@@ -245,11 +317,28 @@ export default function SecurityPage() {
             ))}
           </ul>
         </div>
-
         <div className="bg-white rounded-lg shadow p-6 space-y-6">
-          <h2 className="text-xl font-medium">Активные сигналы</h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-medium">Активные сигналы</h2>
+            <div>
+              <button
+                className="px-3 py-1 bg-blue-600 text-white rounded text-sm"
+                onClick={() => setShowSignalModal(true)}
+              >+ Добавить сигнал</button>
+              <select
+                className="ml-2 px-2 py-1 border rounded text-sm"
+                value={filter}
+                onChange={e => setFilter(e.target.value as typeof filter)}
+              >
+                <option value="all">Все</option>
+                <option value="high">Высокий</option>
+                <option value="medium">Средний</option>
+                <option value="low">Низкий</option>
+              </select>
+            </div>
+          </div>
           <ul className="space-y-4">
-            {signals.map(sig => (
+            {signals.filter(sig => filter === 'all' ? true : sig.severity === filter).map(sig => (
               <li key={sig.id} className={`${signalBg(sig.severity)} p-4 rounded-lg`}>
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
@@ -261,8 +350,8 @@ export default function SecurityPage() {
                 <div className="flex justify-between items-center mt-2">
                   <p className="text-xs text-gray-500">{sig.time}</p>
                   <div className="space-x-2">
-                    <button className="px-3 py-1 bg-white text-gray-700 rounded text-sm">Проверка</button>
-                    <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm">Решить</button>
+                    <button className="px-3 py-1 bg-white text-gray-700 rounded text-sm" onClick={() => toast.info('Проверка сигнала...')}>Проверка</button>
+                    <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm" onClick={() => resolveSignal(sig.id)}>Решить</button>
                   </div>
                 </div>
               </li>
@@ -272,7 +361,10 @@ export default function SecurityPage() {
       </div>
 
       {protocols.map(p => (
-        <div key={p.id} className={`${p.color === 'red' ? 'bg-red-50' : p.color === 'blue' ? 'bg-blue-50' : 'bg-green-50'} rounded-lg shadow p-6`}>
+        <div
+          key={p.id}
+          className={`${p.color === 'red' ? 'bg-red-50' : p.color === 'blue' ? 'bg-blue-50' : 'bg-green-50'} rounded-lg shadow p-6 ${activatedId === p.id ? 'ring-2 ring-red-500' : ''}`}
+        >
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center space-x-2">
               {p.icon}
@@ -289,8 +381,12 @@ export default function SecurityPage() {
             ))}
           </ol>
           <div className="flex justify-between items-center mt-4">
-            <button className="flex-1 bg-black text-white px-4 py-2 rounded">Активировать протокол</button>
-            <button className="ml-4 text-sm text-gray-700">Редактировать</button>
+            <button className="flex-1 bg-black text-white px-4 py-2 rounded" onClick={() => activateProtocol(p.id)}>
+              Активировать протокол
+            </button>
+            <button className="ml-4 text-sm text-gray-700" onClick={() => toast.info('Редактирование протокола скоро будет доступно')}>
+              Редактировать
+            </button>
           </div>
         </div>
       ))}
