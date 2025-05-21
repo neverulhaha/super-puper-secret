@@ -384,7 +384,7 @@ export default function SecurityPage() {
             <button className="flex-1 bg-black text-white px-4 py-2 rounded" onClick={() => activateProtocol(p.id)}>
               Активировать протокол
             </button>
-            <button className="ml-4 text-sm text-gray-700" onClick={() => toast.info('Редактирование протокола скоро будет доступно')}>
+            <button className="ml-4 text-sm text-gray-700" onClick={() => toast.info('Редактирование протокола скоро будет доступно ')}>
               Редактировать
             </button>
           </div>
