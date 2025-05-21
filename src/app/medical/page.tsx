@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   UsersIcon,
   HeartIcon,
@@ -66,6 +66,16 @@ const initialReports: Report[] = [
   { id: 3, title: 'Психологическое обследование', date: '2025-05-13', type: 'Психическое здоровье', status: 'Выполнено', worker: 'Доктор Ильин Егор', details: 'Психоэмоциональное состояние экипажа стабильно.' }
 ]
 
+// Критические значения
+const isCritical = (p: Patient) => {
+  const crit: string[] = []
+  if (p.heartRate < 50 || p.heartRate > 110) crit.push('Пульс')
+  if (p.temperature < 35.5 || p.temperature > 38) crit.push('Температура')
+  if (parseInt(p.bp) > 150 || parseInt(p.bp) < 90) crit.push('Давление')
+  if (p.spo2 < 92) crit.push('Кислород (SpO₂)')
+  return crit
+}
+
 function getStatusIcon(status: Patient['status']) {
   if (status === 'ok') return <CheckCircleIcon className="w-6 h-6 text-green-500" />
   return <ExclamationTriangleIcon className="w-6 h-6 text-yellow-500" />
@@ -83,6 +93,25 @@ export default function MedicinePage() {
   const [reports] = useState<Report[]>(initialReports)
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
+
+  // Автоматические уведомления о критических параметрах
+  useEffect(() => {
+    patients.forEach(p => {
+      const crits = isCritical(p)
+      if (crits.length > 0) {
+        toast.error(
+          <span>
+            Критические показатели: <b>{p.name}</b> — {crits.join(', ')}
+          </span>,
+          {
+            toastId: `critical_${p.id}_${crits.join('_')}`,
+            icon: <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />,
+            autoClose: 7000
+          }
+        )
+      }
+    })
+  }, [patients])
 
   function handleEmergencyHelp(id: number) {
     setPatients(patients =>
@@ -119,10 +148,9 @@ export default function MedicinePage() {
   }
 
   function handleProtocolDetails(protocol: Protocol) {
-    
-  toast.info(protocol.description, {
-  icon: <DocumentTextIcon className="w-5 h-5 text-blue-500" />
-});
+    toast.info(protocol.description, {
+      icon: <DocumentTextIcon className="w-5 h-5 text-blue-500" />
+    });
   }
 
   function markProtocolCompleted(id: number) {
@@ -162,7 +190,7 @@ export default function MedicinePage() {
           <div>
             <p className="text-sm text-gray-500">Медицинские уведомления</p>
             <p className="text-lg font-medium">
-              {patients.filter(p => p.status === 'alert').length} Активно
+              {patients.filter(p => p.status === 'alert' || isCritical(p).length > 0).length} Активно
             </p>
           </div>
         </div>
