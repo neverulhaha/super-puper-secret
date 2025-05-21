@@ -96,7 +96,12 @@ function slerpVectors(a: THREE.Vector3, b: THREE.Vector3, t: number): THREE.Vect
   return a.clone().multiplyScalar(w1).add(b.clone().multiplyScalar(w2))
 }
 
-function getArcPointsBetweenZones(fromObj: MapObject, toObj: MapObject, arcRadius = 1.07, segments = 128): ArcPoint[] {
+function getArcPointsBetweenZones(
+  fromObj: MapObject,
+  toObj: MapObject,
+  arcRadius = 1.07,
+  segments = 128
+): ArcPoint[] {
   const fromCenter = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z)
   const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z)
   const fromZoneRadius = getZoneRadius(fromObj.typeKey)
@@ -106,7 +111,10 @@ function getArcPointsBetweenZones(fromObj: MapObject, toObj: MapObject, arcRadiu
   const fromEdge = fromCenter.clone().add(fromDir.multiplyScalar(fromZoneRadius))
   const toEdge = toCenter.clone().add(toDir.multiplyScalar(toZoneRadius))
   const fromArc = fromEdge.clone().normalize().multiplyScalar(arcRadius)
-  const toArc = toEdge.clone().normalize().multiplyScalar(arcRadius)
+  const toArc = toEdge.clone()
+    .normalize()
+    .multiplyScalar(arcRadius - 0.13 * toZoneRadius)
+
   const points: ArcPoint[] = []
   for (let i = 0; i <= segments; i++) {
     const t = i / segments
