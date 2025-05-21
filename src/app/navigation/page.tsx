@@ -102,22 +102,27 @@ function getArcPointsBetweenZonesOnMoon(
   segments = 128,
   moonRadius = 1
 ): ArcPoint[] {
-  const fromCenter = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z);
-  const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z);
+  const fromCenter = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z)
+  const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z)
 
-  const dir = toCenter.clone().sub(fromCenter).normalize();
+  const dir = toCenter.clone().sub(fromCenter).normalize()
 
-  const start = fromCenter.clone().add(dir.clone().multiplyScalar(moonRadius)).normalize().multiplyScalar(moonRadius);
-  const end = toCenter.clone().add(fromCenter.clone().sub(toCenter).normalize().multiplyScalar(moonRadius)).normalize().multiplyScalar(moonRadius);
+  const fromZoneRadius = getZoneRadius(fromObj.typeKey)
+  const toZoneRadius = getZoneRadius(toObj.typeKey)
 
-  const points: ArcPoint[] = [];
+  const start = fromCenter.clone().add(dir.clone().multiplyScalar(fromZoneRadius))
+  const toDir = fromCenter.clone().sub(toCenter).normalize()
+  const end = toCenter.clone().add(toDir.multiplyScalar(toZoneRadius))
+
+  const points: ArcPoint[] = []
   for (let i = 0; i <= segments; i++) {
-    const t = i / segments;
-    const vec = slerpVectors(start, end, t).normalize().multiplyScalar(moonRadius);
-    points.push({ x: vec.x, y: vec.y, z: vec.z });
+    const t = i / segments
+    const vec = slerpVectors(start, end, t)
+    points.push({ x: vec.x, y: vec.y, z: vec.z })
   }
-  return points;
+  return points
 }
+
 
 
 
