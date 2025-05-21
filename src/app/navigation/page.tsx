@@ -96,31 +96,22 @@ function slerpVectors(a: THREE.Vector3, b: THREE.Vector3, t: number): THREE.Vect
   return a.clone().multiplyScalar(w1).add(b.clone().multiplyScalar(w2))
 }
 
-function getArcPointsOnSphere(
-  fromObj: MapObject,
-  toObj: MapObject,
-  segments = 128,
-  moonRadius = 1
-): ArcPoint[] {
-  const c1 = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z)
-  const c2 = new THREE.Vector3(toObj.x, toObj.y, toObj.z)
-
-  const r1 = getZoneRadius(fromObj.typeKey)
-  const r2 = getZoneRadius(toObj.typeKey)
-
-  const v1 = c2.clone().sub(c1).normalize()
-  const p1 = c1.clone().add(v1.clone().multiplyScalar(r1))
-
-  const v2 = c1.clone().sub(c2).normalize()
-  const p2 = c2.clone().add(v2.clone().multiplyScalar(r2))
-
-  const surf1 = p1.clone().normalize().multiplyScalar(moonRadius + 0.01)
-  const surf2 = p2.clone().normalize().multiplyScalar(moonRadius + 0.01)
+function getArcPointsBetweenZones(fromObj: MapObject, toObj: MapObject, arcRadius = 1.07, segments = 128): ArcPoint[] {
+  const fromCenter = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z)
+  const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z)
+  const fromZoneRadius = getZoneRadius(fromObj.typeKey)
+  const toZoneRadius = getZoneRadius(toObj.typeKey)
+  const fromDir = toCenter.clone().sub(fromCenter).normalize()
+  const toDir = fromCenter.clone().sub(toCenter).normalize()
+  const fromEdge = fromCenter.clone().add(fromDir.multiplyScalar(fromZoneRadius))
+  const toEdge = toCenter.clone().add(toDir.multiplyScalar(toZoneRadius))
+  const fromArc = fromEdge.clone().normalize().multiplyScalar(arcRadius)
+  const toArc = toEdge.clone().normalize().multiplyScalar(arcRadius)
   const points: ArcPoint[] = []
   for (let i = 0; i <= segments; i++) {
     const t = i / segments
-    const pt = slerpVectors(surf1, surf2, t)
-    points.push({ x: pt.x, y: pt.y, z: pt.z })
+    const vec = slerpVectors(fromArc, toArc, t)
+    points.push({ x: vec.x, y: vec.y, z: vec.z })
   }
   return points
 }
@@ -275,7 +266,7 @@ export default function NavigationPage() {
     const fromObj = mapObjects.find(obj => obj.id.toString() === routeParams.from)
     const toObj = mapObjects.find(obj => obj.id.toString() === routeParams.to)
     if (fromObj && toObj) {
-      const points = getArcPointsOnSphere(fromObj, toObj)
+      const points = getArcPointsBetweenZones(fromObj, toObj)
 
       setRouteLine({ points })
       setRouteName('')
