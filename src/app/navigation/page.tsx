@@ -96,7 +96,7 @@ function slerpVectors(a: THREE.Vector3, b: THREE.Vector3, t: number): THREE.Vect
   return a.clone().multiplyScalar(w1).add(b.clone().multiplyScalar(w2))
 }
 
-function getArcPointsBetweenZones(
+function getArcPointsBetweenZonesOnMoon(
   fromObj: MapObject,
   toObj: MapObject,
   segments = 128,
@@ -105,31 +105,20 @@ function getArcPointsBetweenZones(
   const fromCenter = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z);
   const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z);
 
-  const fromZoneRadius = getZoneRadius(fromObj.typeKey);
-  const toZoneRadius = getZoneRadius(toObj.typeKey);
   const dir = toCenter.clone().sub(fromCenter).normalize();
 
-  const start = fromCenter.clone().add(dir.clone().multiplyScalar(fromZoneRadius * 0.7));
-  const startNormal = start.clone().normalize();
-  const startOnMoon = startNormal.clone().multiplyScalar(moonRadius + fromZoneRadius * 0.7);
-
-  const endDir = fromCenter.clone().sub(toCenter).normalize();
-  const end = toCenter.clone().add(endDir.clone().multiplyScalar(toZoneRadius));
-  const endNormal = end.clone().normalize();
-  const endOnMoon = endNormal.clone().multiplyScalar(moonRadius + toZoneRadius);
+  const start = fromCenter.clone().add(dir.clone().multiplyScalar(moonRadius)).normalize().multiplyScalar(moonRadius);
+  const end = toCenter.clone().add(fromCenter.clone().sub(toCenter).normalize().multiplyScalar(moonRadius)).normalize().multiplyScalar(moonRadius);
 
   const points: ArcPoint[] = [];
   for (let i = 0; i <= segments; i++) {
     const t = i / segments;
-    const vec = slerpVectors(startOnMoon, endOnMoon, t).normalize().multiplyScalar(
-      moonRadius +
-        fromZoneRadius * (1 - t) * 0.7 +
-        toZoneRadius * t
-    );
+    const vec = slerpVectors(start, end, t).normalize().multiplyScalar(moonRadius);
     points.push({ x: vec.x, y: vec.y, z: vec.z });
   }
   return points;
 }
+
 
 
 
@@ -283,7 +272,8 @@ export default function NavigationPage() {
     const fromObj = mapObjects.find(obj => obj.id.toString() === routeParams.from)
     const toObj = mapObjects.find(obj => obj.id.toString() === routeParams.to)
     if (fromObj && toObj) {
-      const points = getArcPointsBetweenZones(fromObj, toObj)
+      const points = getArcPointsBetweenZonesOnMoon(fromObj, toObj)
+
       setRouteLine({ points })
       setRouteName('')
       setRouteColor(getTypeColor(fromObj.typeKey))
