@@ -99,27 +99,29 @@ function slerpVectors(a: THREE.Vector3, b: THREE.Vector3, t: number): THREE.Vect
 function getArcPointsBetweenZones(
   fromObj: MapObject,
   toObj: MapObject,
-  arcRadius = 1.07,
-  segments = 128
+  segments = 128,
+  altitude = 0.0
 ): ArcPoint[] {
-  const fromCenter = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z)
-  const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z)
+  const moonRadius = 1
   const fromZoneRadius = getZoneRadius(fromObj.typeKey)
   const toZoneRadius = getZoneRadius(toObj.typeKey)
-  const fromDir = toCenter.clone().sub(fromCenter).normalize()
-  const toDir = fromCenter.clone().sub(toCenter).normalize()
-
-  const fromEdge = fromCenter.clone().add(fromDir.multiplyScalar(fromZoneRadius))
-  const toEdge = toCenter.clone().add(toDir.multiplyScalar(toZoneRadius))
+  const fromCenter = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z)
+  const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z)
+  const fromNormal = fromCenter.clone().normalize()
+  const toNormal = toCenter.clone().normalize()
+  const fromEdge = fromNormal.clone().multiplyScalar(moonRadius + fromZoneRadius + altitude)
+  const toEdge = toNormal.clone().multiplyScalar(moonRadius + toZoneRadius + altitude)
 
   const points: ArcPoint[] = []
   for (let i = 0; i <= segments; i++) {
     const t = i / segments
-    const vec = slerpVectors(fromEdge, toEdge, t)
+    const vec = slerpVectors(fromEdge, toEdge, t).normalize()
+      .multiplyScalar(moonRadius + (fromZoneRadius * (1 - t) + toZoneRadius * t) + altitude)
     points.push({ x: vec.x, y: vec.y, z: vec.z })
   }
   return points
 }
+
 export default function NavigationPage() {
   const [statsRouteId, setStatsRouteId] = useState<number | null>(null)
   const [visibleRouteIds, setVisibleRouteIds] = useState<number[]>([])
