@@ -96,36 +96,34 @@ function slerpVectors(a: THREE.Vector3, b: THREE.Vector3, t: number): THREE.Vect
   return a.clone().multiplyScalar(w1).add(b.clone().multiplyScalar(w2))
 }
 
-function getArcPointsBetweenZonesOnMoon(
+function getArcPointsOnSphere(
   fromObj: MapObject,
   toObj: MapObject,
   segments = 128,
   moonRadius = 1
 ): ArcPoint[] {
-  const fromCenter = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z)
-  const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z)
+  const c1 = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z)
+  const c2 = new THREE.Vector3(toObj.x, toObj.y, toObj.z)
 
-  const dir = toCenter.clone().sub(fromCenter).normalize()
+  const r1 = getZoneRadius(fromObj.typeKey)
+  const r2 = getZoneRadius(toObj.typeKey)
 
-  const fromZoneRadius = getZoneRadius(fromObj.typeKey)
-  const toZoneRadius = getZoneRadius(toObj.typeKey)
+  const v1 = c2.clone().sub(c1).normalize()
+  const p1 = c1.clone().add(v1.clone().multiplyScalar(r1))
 
-  const start = fromCenter.clone().add(dir.clone().multiplyScalar(fromZoneRadius))
-  const toDir = fromCenter.clone().sub(toCenter).normalize()
-  const end = toCenter.clone().add(toDir.multiplyScalar(toZoneRadius))
+  const v2 = c1.clone().sub(c2).normalize()
+  const p2 = c2.clone().add(v2.clone().multiplyScalar(r2))
 
+  const surf1 = p1.clone().normalize().multiplyScalar(moonRadius + 0.01)
+  const surf2 = p2.clone().normalize().multiplyScalar(moonRadius + 0.01)
   const points: ArcPoint[] = []
   for (let i = 0; i <= segments; i++) {
     const t = i / segments
-    const vec = slerpVectors(start, end, t)
-    points.push({ x: vec.x, y: vec.y, z: vec.z })
+    const pt = slerpVectors(surf1, surf2, t)
+    points.push({ x: pt.x, y: pt.y, z: pt.z })
   }
   return points
 }
-
-
-
-
 
 export default function NavigationPage() {
   const [statsRouteId, setStatsRouteId] = useState<number | null>(null)
@@ -277,7 +275,7 @@ export default function NavigationPage() {
     const fromObj = mapObjects.find(obj => obj.id.toString() === routeParams.from)
     const toObj = mapObjects.find(obj => obj.id.toString() === routeParams.to)
     if (fromObj && toObj) {
-      const points = getArcPointsBetweenZonesOnMoon(fromObj, toObj)
+      const points = getArcPointsOnSphere(fromObj, toObj)
 
       setRouteLine({ points })
       setRouteName('')
