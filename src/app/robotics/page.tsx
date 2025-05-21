@@ -13,6 +13,7 @@ import {
   VideoCameraIcon,
   MapIcon,
 } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
 
 function randomInt(a: number, b: number) {
   return Math.floor(Math.random() * (b - a + 1)) + a;
@@ -47,7 +48,6 @@ export default function RoboticsPage() {
   const [telescopes, setTelescopes] = useState(initialTelescopes);
   const [activeTel, setActiveTel] = useState(1);
   const [drones, setDrones] = useState(initialDrones);
-  const [alert, setAlert] = useState<string | null>(null);
   const [newTaskOpen, setNewTaskOpen] = useState(false);
   const [newTask, setNewTask] = useState({ name: '', bot: '', eta: '1 час' });
 
@@ -95,9 +95,9 @@ export default function RoboticsPage() {
     return () => clearInterval(intv);
   }, []);
 
-  useEffect(() => {
-    if (alert) setTimeout(() => setAlert(null), 2000);
-  }, [alert]);
+  function notify(msg: string, type: 'success' | 'info' | 'error' = 'info') {
+    toast[type](msg, { position: 'top-right', autoClose: 2000 });
+  }
 
   function handleBotAction(id: number) {
     setBots(prev =>
@@ -109,7 +109,7 @@ export default function RoboticsPage() {
           : b
       )
     );
-    setAlert('Статус робота обновлён');
+    notify('Статус робота обновлён');
   }
   function handleBotCharge(id: number) {
     setBots(prev =>
@@ -119,7 +119,7 @@ export default function RoboticsPage() {
           : b
       )
     );
-    setAlert('Бот поставлен на зарядку');
+    notify('Бот поставлен на зарядку', 'success');
   }
 
   function handleAddTask() {
@@ -137,7 +137,7 @@ export default function RoboticsPage() {
     ]);
     setNewTask({ name: '', bot: '', eta: '1 час' });
     setNewTaskOpen(false);
-    setAlert('Задание добавлено!');
+    notify('Задание добавлено!', 'success');
   }
 
   function handleTelescopeChange(key: keyof typeof telescopes[0], value: string) {
@@ -149,28 +149,25 @@ export default function RoboticsPage() {
     setTelescopes(telescopes.map(t =>
       t.id === activeTel ? { ...t, aligned: true, status: 'Выравнен' } : t
     ));
-    setAlert('Телескоп выровнен!');
+    notify('Телескоп выровнен!', 'success');
   }
   function handleObserve() {
     setTelescopes(telescopes.map(t =>
       t.id === activeTel ? { ...t, status: 'Идёт наблюдение' } : t
     ));
-    setAlert('Наблюдение началось!');
+    notify('Наблюдение началось!', 'info');
   }
 
   function handleDroneStart(id: number) {
     setDrones(drones.map(d => d.id === id ? { ...d, active: true, task: 'В полёте' } : d));
-    setAlert('Дрон запущен');
+    notify('Дрон запущен', 'success');
   }
   function handleDroneRoute(id: number) {
-    setAlert('Показ маршрута дрона (заглушка)');
+    notify('Показ маршрута дрона (заглушка)');
   }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
-      {alert && (
-        <div className="fixed top-5 right-5 bg-blue-600 text-white px-4 py-2 rounded shadow-lg z-50">{alert}</div>
-      )}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Управление роботами</h1>
         <button
@@ -181,7 +178,6 @@ export default function RoboticsPage() {
         </button>
       </div>
 
-      {/* Модалка новой миссии */}
       {newTaskOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
           <div className="bg-white rounded-xl shadow p-8 space-y-4 min-w-[320px]">
@@ -338,8 +334,8 @@ export default function RoboticsPage() {
           <div className="flex space-x-4">
             <button className="bg-blue-600 text-white px-4 py-2 rounded" onClick={handleAlign}>Выравнить телескоп</button>
             <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={handleObserve}>Начать наблюдение</button>
-            <button className="ml-auto p-2" onClick={() => setAlert('Обновить данные телескопа (заглушка)')}><ArrowPathIcon className="w-5 h-5 text-gray-600" /></button>
-            <button className="p-2" onClick={() => setAlert('Выгрузка данных (заглушка)')}><ArrowUpTrayIcon className="w-5 h-5 text-gray-600" /></button>
+            <button className="ml-auto p-2" onClick={() => notify('Обновить данные телескопа (заглушка)')}><ArrowPathIcon className="w-5 h-5 text-gray-600" /></button>
+            <button className="p-2" onClick={() => notify('Выгрузка данных (заглушка)')}><ArrowUpTrayIcon className="w-5 h-5 text-gray-600" /></button>
           </div>
         </div>
 
