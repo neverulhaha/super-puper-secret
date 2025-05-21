@@ -147,7 +147,7 @@ export default function LunarMapEmbedInfrastructure({
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
     controls.dampingFactor = 0.05
-    controls.minDistance = 1.2
+    controls.minDistance = 1.4
     controls.maxDistance = 3
     controlsRef.current = controls
 
