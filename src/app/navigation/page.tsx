@@ -100,31 +100,37 @@ function getArcPointsBetweenZones(
   fromObj: MapObject,
   toObj: MapObject,
   segments = 128,
-  altitude = 0.0
+  moonRadius = 1
 ): ArcPoint[] {
-  const moonRadius = 1
-  const fromZoneRadius = getZoneRadius(fromObj.typeKey)
-  const toZoneRadius = getZoneRadius(toObj.typeKey)
-  const fromCenter = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z)
-  const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z)
-  const fromNormal = fromCenter.clone().normalize()
-  const toNormal = toCenter.clone().normalize()
+  const fromCenter = new THREE.Vector3(fromObj.x, fromObj.y, fromObj.z);
+  const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z);
 
-  const startFactor = 0.5
-  const endFactor = 1.0
+  const fromZoneRadius = getZoneRadius(fromObj.typeKey);
+  const toZoneRadius = getZoneRadius(toObj.typeKey);
+  const dir = toCenter.clone().sub(fromCenter).normalize();
 
-  const fromEdge = fromNormal.clone().multiplyScalar(moonRadius + fromZoneRadius * startFactor + altitude)
-  const toEdge = toNormal.clone().multiplyScalar(moonRadius + toZoneRadius * endFactor + altitude)
+  const start = fromCenter.clone().add(dir.clone().multiplyScalar(fromZoneRadius * 0.7));
+  const startNormal = start.clone().normalize();
+  const startOnMoon = startNormal.clone().multiplyScalar(moonRadius + fromZoneRadius * 0.7);
 
-  const points: ArcPoint[] = []
+  const endDir = fromCenter.clone().sub(toCenter).normalize();
+  const end = toCenter.clone().add(endDir.clone().multiplyScalar(toZoneRadius));
+  const endNormal = end.clone().normalize();
+  const endOnMoon = endNormal.clone().multiplyScalar(moonRadius + toZoneRadius);
+
+  const points: ArcPoint[] = [];
   for (let i = 0; i <= segments; i++) {
-    const t = i / segments
-    const len = moonRadius + fromZoneRadius * (1 - t) * startFactor + toZoneRadius * t * endFactor + altitude
-    const vec = slerpVectors(fromEdge, toEdge, t).normalize().multiplyScalar(len)
-    points.push({ x: vec.x, y: vec.y, z: vec.z })
+    const t = i / segments;
+    const vec = slerpVectors(startOnMoon, endOnMoon, t).normalize().multiplyScalar(
+      moonRadius +
+        fromZoneRadius * (1 - t) * 0.7 +
+        toZoneRadius * t
+    );
+    points.push({ x: vec.x, y: vec.y, z: vec.z });
   }
-  return points
+  return points;
 }
+
 
 
 export default function NavigationPage() {
