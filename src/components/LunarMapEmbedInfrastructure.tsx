@@ -346,12 +346,6 @@ export default function LunarMapEmbedInfrastructure({
       })
       const line = new THREE.Line(geometry, material)
       group.add(line)
-      const end = points[points.length - 1]
-      const prev = points[points.length - 2]
-      const dir = new THREE.Vector3().subVectors(end, prev).normalize()
-      const arrowLength = 0.13
-      const arrowHelper = new THREE.ArrowHelper(dir, end, arrowLength, isSelected ? 0x06b6d4 : lineColor, 0.07, 0.05)
-      group.add(arrowHelper)
     }
   }
 }
