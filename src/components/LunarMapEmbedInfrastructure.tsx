@@ -380,7 +380,7 @@ export default function LunarMapEmbedInfrastructure({
   const end = points[points.length - 1]
   const prev = points[points.length - 2]
   const dir = new THREE.Vector3().subVectors(end, prev).normalize()
-  const arrowLength = 0.05
+  const arrowLength = -0.05
   const arrowHelper = new THREE.ArrowHelper(dir, end, arrowLength, lineColor)
   group.add(arrowHelper)
 }
