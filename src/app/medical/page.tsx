@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   UsersIcon,
   HeartIcon,
@@ -15,7 +15,6 @@ import {
   ArrowTrendingUpIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline'
-import { toast } from 'react-toastify'
 
 type Patient = {
   id: number
@@ -48,6 +47,14 @@ type Report = {
   details?: string
 }
 
+type Notification = {
+  id: number
+  type: 'error' | 'info' | 'success' | 'warn'
+  title: string
+  description: string
+  patientId?: number
+}
+
 const initialPatients: Patient[] = [
   { id: 1, name: 'Егор Ильин', role: 'Командир миссии', heartRate: 72, temperature: 36.6, bp: '120/80 мм рт.ст.', spo2: 98, status: 'ok' },
   { id: 2, name: 'Дмитрий Павлов', role: 'Научный сотрудник', heartRate: 85, temperature: 37.2, bp: '135/85 мм рт.ст.', spo2: 96, status: 'alert' },
@@ -66,16 +73,6 @@ const initialReports: Report[] = [
   { id: 3, title: 'Психологическое обследование', date: '2025-05-13', type: 'Психическое здоровье', status: 'Выполнено', worker: 'Доктор Ильин Егор', details: 'Психоэмоциональное состояние экипажа стабильно.' }
 ]
 
-// Критические значения
-const isCritical = (p: Patient) => {
-  const crit: string[] = []
-  if (p.heartRate < 50 || p.heartRate > 110) crit.push('Пульс')
-  if (p.temperature < 35.5 || p.temperature > 38) crit.push('Температура')
-  if (parseInt(p.bp) > 150 || parseInt(p.bp) < 90) crit.push('Давление')
-  if (p.spo2 < 92) crit.push('Кислород (SpO₂)')
-  return crit
-}
-
 function getStatusIcon(status: Patient['status']) {
   if (status === 'ok') return <CheckCircleIcon className="w-6 h-6 text-green-500" />
   return <ExclamationTriangleIcon className="w-6 h-6 text-yellow-500" />
@@ -93,22 +90,31 @@ export default function MedicinePage() {
   const [reports] = useState<Report[]>(initialReports)
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [noteFilter, setNoteFilter] = useState<'all' | 'error' | 'warn' | 'info' | 'success'>('all')
 
-  // Автоматические уведомления о критических параметрах
   useEffect(() => {
     patients.forEach(p => {
-      const crits = isCritical(p)
-      if (crits.length > 0) {
-        toast.error(
-          <span>
-            Критические показатели: <b>{p.name}</b> — {crits.join(', ')}
-          </span>,
-          {
-            toastId: `critical_${p.id}_${crits.join('_')}`,
-            icon: <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />,
-            autoClose: 7000
-          }
-        )
+      let criticals = []
+      if (p.heartRate < 50 || p.heartRate > 110) criticals.push('Пульс')
+      if (p.temperature < 35.5 || p.temperature > 38) criticals.push('Температура')
+      if (parseInt(p.bp) > 150 || parseInt(p.bp) < 90) criticals.push('Давление')
+      if (p.spo2 < 92) criticals.push('Кислород (SpO₂)')
+      if (criticals.length > 0) {
+        if (!notifications.find(n => n.patientId === p.id && n.type === 'error')) {
+          setNotifications(prev => [
+            ...prev,
+            {
+              id: Date.now() + p.id,
+              type: 'error',
+              title: `Критические показатели: ${p.name}`,
+              description: `Внимание! У пациента опасные значения: ${criticals.join(', ')}`,
+              patientId: p.id
+            }
+          ])
+        }
+      } else {
+        setNotifications(prev => prev.filter(n => n.patientId !== p.id || n.type !== 'error'))
       }
     })
   }, [patients])
@@ -120,7 +126,17 @@ export default function MedicinePage() {
         : p
       )
     )
-    toast.success('Экстренная помощь оказана')
+    setNotifications(prev => prev.filter(n => n.patientId !== id || n.type !== 'error'))
+    setNotifications(prev => [
+      ...prev,
+      {
+        id: Date.now() + id,
+        type: 'success',
+        title: 'Экстренная помощь оказана',
+        description: `Параметры пациента восстановлены`,
+        patientId: id
+      }
+    ])
     setSelectedPatient(null)
   }
 
@@ -144,21 +160,47 @@ export default function MedicinePage() {
   }
 
   function handleDownloadReport(report: Report) {
-    toast.success(`Отчет "${report.title}" успешно скачан`)
+    setNotifications(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        type: 'info',
+        title: `Отчет "${report.title}" успешно скачан`,
+        description: 'Отчет загружен как PDF'
+      }
+    ])
   }
 
   function handleProtocolDetails(protocol: Protocol) {
-    toast.info(protocol.description, {
-      icon: <DocumentTextIcon className="w-5 h-5 text-blue-500" />
-    });
+    setNotifications(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        type: protocol.status === 'alert' ? 'warn' : 'info',
+        title: protocol.title,
+        description: protocol.description
+      }
+    ])
   }
 
   function markProtocolCompleted(id: number) {
     setProtocols(protocols =>
       protocols.map(p => p.id === id ? { ...p, completed: true } : p)
     )
-    toast.success('Протокол отмечен как выполненный')
+    setNotifications(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        type: 'success',
+        title: 'Протокол выполнен',
+        description: 'Протокол отмечен как выполненный'
+      }
+    ])
   }
+
+  const filteredNotifications = noteFilter === 'all'
+    ? notifications
+    : notifications.filter(n => n.type === noteFilter)
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black space-y-8">
@@ -190,11 +232,44 @@ export default function MedicinePage() {
           <div>
             <p className="text-sm text-gray-500">Медицинские уведомления</p>
             <p className="text-lg font-medium">
-              {patients.filter(p => p.status === 'alert' || isCritical(p).length > 0).length} Активно
+              {notifications.filter(n => n.type === 'error').length} Активно
             </p>
           </div>
         </div>
       </div>
+      <div className="mb-4 flex gap-2">
+        <button onClick={() => setNoteFilter('all')} className={`px-2 py-1 rounded ${noteFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>Все</button>
+        <button onClick={() => setNoteFilter('error')} className={`px-2 py-1 rounded ${noteFilter === 'error' ? 'bg-red-500 text-white' : 'bg-gray-200'}`}>Критичные</button>
+        <button onClick={() => setNoteFilter('warn')} className={`px-2 py-1 rounded ${noteFilter === 'warn' ? 'bg-yellow-500 text-white' : 'bg-gray-200'}`}>Внимание</button>
+        <button onClick={() => setNoteFilter('info')} className={`px-2 py-1 rounded ${noteFilter === 'info' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}>Инфо</button>
+        <button onClick={() => setNoteFilter('success')} className={`px-2 py-1 rounded ${noteFilter === 'success' ? 'bg-green-500 text-white' : 'bg-gray-200'}`}>Успех</button>
+      </div>
+      <section className="mb-8">
+        <h2 className="text-xl font-semibold mb-3">Медицинские уведомления</h2>
+        <ul className="space-y-2">
+          {filteredNotifications.length === 0 && (
+            <li className="text-gray-400 text-sm">Нет активных уведомлений</li>
+          )}
+          {filteredNotifications.map(n => (
+            <li key={n.id} className="bg-white rounded p-3 shadow flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                {n.type === 'error' && <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />}
+                {n.type === 'warn' && <ExclamationTriangleIcon className="w-5 h-5 text-yellow-500" />}
+                {n.type === 'info' && <BellAlertIcon className="w-5 h-5 text-blue-500" />}
+                {n.type === 'success' && <CheckCircleIcon className="w-5 h-5 text-green-500" />}
+                <div>
+                  <div className="font-medium">{n.title}</div>
+                  <div className="text-sm text-gray-500">{n.description}</div>
+                </div>
+              </div>
+              <button
+                className="text-xs text-gray-400"
+                onClick={() => setNotifications(notifications.filter(note => note.id !== n.id))}
+              >Закрыть</button>
+            </li>
+          ))}
+        </ul>
+      </section>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-xl font-medium">Контроль состояния здоровья</h2>
@@ -260,7 +335,15 @@ export default function MedicinePage() {
           </ul>
           <button
             className="w-full bg-blue-600 text-white px-4 py-2 rounded mt-4"
-            onClick={() => toast.info('Форма добавления протокола в разработке')}
+            onClick={() => setNotifications(prev => [
+              ...prev,
+              {
+                id: Date.now(),
+                type: 'info',
+                title: 'Добавление протокола',
+                description: 'Форма добавления протокола в разработке'
+              }
+            ])}
           >
             Добавить новый протокол
           </button>
@@ -310,9 +393,7 @@ export default function MedicinePage() {
             <button
               className="absolute top-3 right-4 text-gray-400 text-2xl"
               onClick={() => setSelectedPatient(null)}
-            >
-              ×
-            </button>
+            >×</button>
             <h3 className="text-xl font-semibold mb-2">{selectedPatient.name}</h3>
             <div className="text-sm text-gray-600 mb-2">{selectedPatient.role}</div>
             <div className="flex flex-col gap-2 mb-4">
@@ -325,27 +406,19 @@ export default function MedicinePage() {
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded"
                 onClick={() => adjustVital(selectedPatient.id, 'heartRate', 10)}
-              >
-                Повысить пульс
-              </button>
+              >Повысить пульс</button>
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded"
                 onClick={() => adjustVital(selectedPatient.id, 'temperature', 0.5)}
-              >
-                Повысить температуру
-              </button>
+              >Повысить температуру</button>
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded"
                 onClick={() => handleEmergencyHelp(selectedPatient.id)}
-              >
-                Экстренная помощь
-              </button>
+              >Экстренная помощь</button>
               <button
                 className="bg-gray-200 text-gray-700 px-4 py-2 rounded"
                 onClick={() => setSelectedPatient(null)}
-              >
-                Закрыть
-              </button>
+              >Закрыть</button>
             </div>
           </div>
         </div>
@@ -356,9 +429,7 @@ export default function MedicinePage() {
             <button
               className="absolute top-3 right-4 text-gray-400 text-2xl"
               onClick={() => setSelectedReport(null)}
-            >
-              ×
-            </button>
+            >×</button>
             <h3 className="text-xl font-semibold mb-2">{selectedReport.title}</h3>
             <div className="text-sm text-gray-600 mb-2">{selectedReport.date} | {selectedReport.type}</div>
             <div className="text-sm text-gray-700 mb-4">{selectedReport.details}</div>
@@ -366,15 +437,11 @@ export default function MedicinePage() {
               <button
                 className="bg-blue-600 text-white px-4 py-2 rounded"
                 onClick={() => { handleDownloadReport(selectedReport); setSelectedReport(null); }}
-              >
-                Скачать PDF
-              </button>
+              >Скачать PDF</button>
               <button
                 className="bg-gray-200 text-gray-700 px-4 py-2 rounded"
                 onClick={() => setSelectedReport(null)}
-              >
-                Закрыть
-              </button>
+              >Закрыть</button>
             </div>
           </div>
         </div>
