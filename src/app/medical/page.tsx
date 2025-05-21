@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   UsersIcon,
   HeartIcon,
@@ -92,7 +92,33 @@ export default function MedicinePage() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [noteFilter, setNoteFilter] = useState<'all' | 'error' | 'warn' | 'info' | 'success'>('all')
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new window.Audio('/warning.mp3')
+      audioRef.current.loop = true
+    }
+    const hasCritical = notifications.some(n => n.type === 'error')
+    if (hasCritical) {
+      if (audioRef.current.paused) {
+        audioRef.current.currentTime = 0
+        audioRef.current.play()
+      }
+    } else {
+      if (!audioRef.current.paused) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
+    }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      }
+    }
+  }, [notifications])
+  
   useEffect(() => {
     patients.forEach(p => {
       let criticals = []
