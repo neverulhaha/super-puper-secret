@@ -109,18 +109,23 @@ function getArcPointsBetweenZones(
   const toCenter = new THREE.Vector3(toObj.x, toObj.y, toObj.z)
   const fromNormal = fromCenter.clone().normalize()
   const toNormal = toCenter.clone().normalize()
-  const fromEdge = fromNormal.clone().multiplyScalar(moonRadius + fromZoneRadius + altitude)
-  const toEdge = toNormal.clone().multiplyScalar(moonRadius + toZoneRadius + altitude)
+
+  const startFactor = 0.5
+  const endFactor = 1.0
+
+  const fromEdge = fromNormal.clone().multiplyScalar(moonRadius + fromZoneRadius * startFactor + altitude)
+  const toEdge = toNormal.clone().multiplyScalar(moonRadius + toZoneRadius * endFactor + altitude)
 
   const points: ArcPoint[] = []
   for (let i = 0; i <= segments; i++) {
     const t = i / segments
-    const vec = slerpVectors(fromEdge, toEdge, t).normalize()
-      .multiplyScalar(moonRadius + (fromZoneRadius * (1 - t) + toZoneRadius * t) + altitude)
+    const len = moonRadius + fromZoneRadius * (1 - t) * startFactor + toZoneRadius * t * endFactor + altitude
+    const vec = slerpVectors(fromEdge, toEdge, t).normalize().multiplyScalar(len)
     points.push({ x: vec.x, y: vec.y, z: vec.z })
   }
   return points
 }
+
 
 export default function NavigationPage() {
   const [statsRouteId, setStatsRouteId] = useState<number | null>(null)
